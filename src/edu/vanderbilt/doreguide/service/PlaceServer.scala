@@ -11,6 +11,45 @@ import java.io.InputStreamReader
  *
  * Created by athran on 4/15/14.
  */
+object PlaceServer {
+
+  /**
+   * Fetches the Place with this Id.
+   *
+   * Reply: Option[Place]
+   */
+  case class  GetPlaceWithId(id: Int)
+
+  /**
+   * Fetches the Places with these Ids. Empty list if no ids
+   * match in the database.
+   *
+   * Reply: List[Place]
+   */
+  case class  GetPlacesIdRange(ids: List[Int])
+
+  /**
+   * Get a list of all the places we have in the database
+   *
+   * Reply: List[Place]
+   */
+  case object GetAllPlaces
+
+  /**
+   * Find the Place closest to the given coordinate
+   *
+   * Reply: ClosestPlace
+   */
+  case class FindClosestPlace(lat: Double, lng: Double)
+
+  /**
+   * Container for the closest request
+   */
+  case class ClosestPlace(plc: Place)
+
+  val rawDataUrl = "https://raw.github.com/AliceCengal/vanderbilt-data/master/places.json"
+}
+
 private[service] class PlaceServer extends Handler.Callback {
 
   import Dore._
@@ -47,11 +86,13 @@ private[service] class PlaceServer extends Handler.Callback {
   }
 
   private def sendPlaceWithId(requester: HandlerActor, id: Int) {
-    requester ! placeBank(id)
+    requester ! placeBank.get(id)
   }
 
   private def sendPlacesWithIDs(requester: HandlerActor, ids: List[Int]) {
-    requester ! ids.map(id => placeBank(id))
+    requester ! ids.
+                map(id => placeBank.get(id)).
+                filter(maybePlace => maybePlace.isDefined)
   }
 
   private def sendAllPlaces(requester: HandlerActor) {
@@ -79,18 +120,7 @@ private[service] class PlaceServer extends Handler.Callback {
                   distanceToReference(plc2))).
         apply(0)
 
-    requester ! closest
+    requester ! ClosestPlace(closest)
   }
 
-}
-
-object PlaceServer {
-  case class  GetPlaceWithId(id: Int)
-  case class  GetPlacesIdRange(ids: List[Int])
-  case object GetAllPlaces
-
-  case class FindClosestPlace(lat: Double, lng: Double)
-  case class ClosestPlace(plc: Place)
-
-  val rawDataUrl = "https://raw.github.com/AliceCengal/vanderbilt-data/master/places.json"
 }

@@ -19,6 +19,7 @@ class Dore extends android.app.Application {
   private val GEOMANCER_INDEX    = 2
 
   private var handles: List[HandlerActor] = List.empty
+  private val eventbusHandle: HandlerActor = new HandlerActor(this.getMainLooper, new EventBus)
 
   override def onCreate() {
     super.onCreate()
@@ -30,6 +31,8 @@ class Dore extends android.app.Application {
   def placeServer: HandlerActor = handles(PLACE_SERVER_INDEX)
 
   def geomancer: HandlerActor   = handles(GEOMANCER_INDEX)
+
+  def eventbus: HandlerActor    = eventbusHandle
 
   private def initializeGlobalState() {
     val thread = new HandlerThread("workerthread")

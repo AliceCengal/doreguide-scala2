@@ -13,6 +13,33 @@ import com.google.gson.JsonParser
  *
  * Created by athran on 4/15/14.
  */
+object ImageServer {
+
+  /**
+   * Downloads or fetches the image from the URL.
+   *
+   * Reply: Image
+   */
+  case class DispatchImage(url: String)
+
+  /**
+   * Downloads or fetches the image from the asset ID
+   * in our database.
+   *
+   * See: https://github.com/AliceCengal/vanderbilt-data/blob/master/images.json
+   *
+   * Reply: Image
+   */
+  case class DispatchImageFromId(id: Int)
+
+  /**
+   * Container for image reply
+   */
+  case class Image(url: String, img: Bitmap)
+
+  val rawUrl = "https://raw2.github.com/AliceCengal/vanderbilt-data/master/images.json"
+}
+
 private[service] class ImageServer extends Handler.Callback {
 
   import Dore._
@@ -73,12 +100,4 @@ private[service] class ImageServer extends Handler.Callback {
     requester ! Image(url, imageLoader.loadImageSync(url))
   }
 
-}
-
-object ImageServer {
-  case class DispatchImage(url: String)
-  case class DispatchImageFromId(id: Int)
-  case class Image(url: String, img: Bitmap)
-
-  val rawUrl = "https://raw2.github.com/AliceCengal/vanderbilt-data/master/images.json"
 }

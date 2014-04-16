@@ -11,47 +11,6 @@ import android.content.Context
  *
  * Created by athran on 4/15/14.
  */
-private[service] class Geomancer extends Handler.Callback {
-
-  import Geomancer._
-
-  private var locationManager: LocationManager = null
-  private var provider: String = null
-  private var serviceStatus: LocationServiceStatus = Disabled
-
-  def handleMessage(msg: Message): Boolean = {
-    msg.obj match {
-      case Initialize(ctx)                        => init(ctx)
-      case (requester: HandlerActor, GetLocation) => replyLocation(requester)
-      case (requester: HandlerActor, GetStatus)   => replyStatus(requester)
-    }
-    true
-  }
-
-  private def init(ctx: Context): Unit = {
-    locationManager =
-        ctx.
-            getSystemService(Context.LOCATION_SERVICE).
-            asInstanceOf[LocationManager]
-
-    provider = locationManager.getBestProvider(defaultCriteria, true)
-
-    if (provider != null) {
-      serviceStatus = Enabled
-    }
-  }
-
-  private def replyLocation(requester: HandlerActor): Unit = {
-    val loc = locationManager.getLastKnownLocation(provider)
-    requester ! Option(loc)
-  }
-
-  private def replyStatus(requester: HandlerActor): Unit = {
-    requester ! serviceStatus
-  }
-
-}
-
 object Geomancer {
   val DEFAULT_LONGITUDE = -86.803889
   val DEFAULT_LATITUDE  = 36.147381
@@ -92,7 +51,7 @@ object Geomancer {
     val dLatR = abs(lat2R - lat1R)
     val dLngR = abs(toRadians(lng2 - lng1))
     val a = pow(sin(dLatR / 2), 2) +
-        cos(lat1R) * cos(lat2R) * sin(dLngR / 2) * sin(dLngR / 2)
+            cos(lat1R) * cos(lat2R) * sin(dLngR / 2) * sin(dLngR / 2)
 
     2 * atan2(sqrt(a), sqrt(1 - a)) * EARTH_RADIUS
   }
@@ -139,4 +98,46 @@ object Geomancer {
    * Location service is available
    */
   case object Enabled  extends LocationServiceStatus
+
+}
+
+private[service] class Geomancer extends Handler.Callback {
+
+  import Geomancer._
+
+  private var locationManager: LocationManager = null
+  private var provider: String = null
+  private var serviceStatus: LocationServiceStatus = Disabled
+
+  def handleMessage(msg: Message): Boolean = {
+    msg.obj match {
+      case Initialize(ctx)                        => init(ctx)
+      case (requester: HandlerActor, GetLocation) => replyLocation(requester)
+      case (requester: HandlerActor, GetStatus)   => replyStatus(requester)
+    }
+    true
+  }
+
+  private def init(ctx: Context): Unit = {
+    locationManager =
+        ctx.
+            getSystemService(Context.LOCATION_SERVICE).
+            asInstanceOf[LocationManager]
+
+    provider = locationManager.getBestProvider(defaultCriteria, true)
+
+    if (provider != null) {
+      serviceStatus = Enabled
+    }
+  }
+
+  private def replyLocation(requester: HandlerActor): Unit = {
+    val loc = locationManager.getLastKnownLocation(provider)
+    requester ! Option(loc)
+  }
+
+  private def replyStatus(requester: HandlerActor): Unit = {
+    requester ! serviceStatus
+  }
+
 }
