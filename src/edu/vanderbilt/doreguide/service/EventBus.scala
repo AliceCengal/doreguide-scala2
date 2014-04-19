@@ -2,6 +2,7 @@ package edu.vanderbilt.doreguide.service
 
 import android.os.{Message, Handler}
 import scala.collection.mutable
+import scala.ref.WeakReference
 
 /**
  * The global event bus that allows components to communicate
@@ -28,7 +29,7 @@ object EventBus {
    * unless there is a big performance issue with sending all
    * messages to all subscribers.
    */
-  case class SubscribeForEvents(who: HandlerActor, eventTypes: Set[Class])
+  //case class SubscribeForEvents(who: HandlerActor, eventTypes: Set[Class])
 
 }
 
@@ -36,15 +37,30 @@ private[service] class EventBus extends Handler.Callback {
 
   import EventBus._
 
-  private val subscribers: mutable.Set[HandlerActor] = mutable.Set.empty
+  private val subscribers: mutable.Set[WeakReference[HandlerActor]] = mutable.Set.empty
 
   def handleMessage(incoming: Message): Boolean = {
     incoming.obj match {
-      case Subscribe(who)   => subscribers.add(who)
-      case Unsubscribe(who) => subscribers.remove(who)
-      case a: AnyRef        => subscribers.foreach(_ ! a)
+      case Subscribe(who)   => subscribers.add(new WeakReference[HandlerActor](who))
+      case Unsubscribe(who) => purgeSubscribers(who)
+      case a: AnyRef        => broadcastEvent(a)
     }
     true
+  }
+
+  def purgeSubscribers(who: HandlerActor): Unit = {
+    subscribers.retain((weakHandler) => {
+      weakHandler.get.isDefined && weakHandler() != who
+    })
+  }
+
+  private def broadcastEvent(event: AnyRef): Unit = {
+    for (
+      weakRefToHandler <- subscribers;
+      maybeHandler     <- weakRefToHandler.get
+    ) {
+      maybeHandler ! event
+    }
   }
 
 }

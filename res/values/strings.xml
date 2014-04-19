@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Vandy Vans</string>
+    <string name="app_name">Dore Guide</string>
     <string name="action_settings">Settings</string>
-    <string name="title_section1">Section 1</string>
-    <string name="title_section2">Section 2</string>
-    <string name="title_section3">Section 3</string>
+
+    <string name="description">Description</string>
+    <string name="nearby">Nearby</string>
+    <string name="related">Related</string>
+    <string name="comment">Comment Card</string>
+    <string name="comment_email">your email address</string>
+    <string name="comment_feedback">feedback</string>
+    <string name="comment_submit">Submit</string>
+
+    <string name="ipsum">
+        You think water moves fast? You should see ice. It moves like it has a mind. Like it knows it killed the world once and got a taste for murder. After the avalanche, it took us a week to climb out. Now, I don\'t know exactly when we turned on each other, but I know that seven of us survived the slide, and only five made it out. Now we took an oath, that I\'m breaking now. We said we\'d say it was the snow that killed the other two, but it wasn\'t. Nature is lethal but it doesn\'t hold a candle to man.
+</string>
 
 </resources>

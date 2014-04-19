@@ -17,3 +17,11 @@ class HandlerActor(looper: Looper, callback: Handler.Callback)
   }
 
 }
+
+trait ActorComponent {
+  self: Handler =>
+
+  def !(msg: AnyRef): Unit = {
+    Message.obtain(self, 0, msg).sendToTarget()
+  }
+}

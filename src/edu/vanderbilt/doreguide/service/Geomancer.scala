@@ -3,7 +3,6 @@ package edu.vanderbilt.doreguide.service
 import android.os.{Message, Handler}
 import java.text.DecimalFormat
 import android.location.{Criteria, LocationManager, Location}
-import edu.vanderbilt.doreguide.service.Dore.Initialize
 import android.content.Context
 
 /**
@@ -14,12 +13,7 @@ import android.content.Context
 object Geomancer {
   val DEFAULT_LONGITUDE = -86.803889
   val DEFAULT_LATITUDE  = 36.147381
-  val DEFAULT_LOC = {
-    val l = new Location("default")
-    l.setLatitude(DEFAULT_LATITUDE)
-    l.setLongitude(DEFAULT_LONGITUDE)
-    l
-  }
+  val DEFAULT_LOC       = initDefaultLocation
 
   val FEET_PER_METER = 3.28083989501312
   val FEET_PER_MILE  = 5280
@@ -66,6 +60,13 @@ object Geomancer {
     crit
   }
 
+  def initDefaultLocation = {
+    val l = new Location("default")
+    l.setLatitude(DEFAULT_LATITUDE)
+    l.setLongitude(DEFAULT_LONGITUDE)
+    l
+  }
+
   /**
    * Request current location
    *
@@ -83,6 +84,8 @@ object Geomancer {
   case object UpdateLocation
 
   case object TimerStop
+
+  case class LocationResult(maybeLoc: Option[Location])
 
   /**
    * Indicates the current status of the location service
@@ -104,10 +107,11 @@ object Geomancer {
 private[service] class Geomancer extends Handler.Callback {
 
   import Geomancer._
+  import Dore.Initialize
 
-  private var locationManager: LocationManager = null
-  private var provider: String = null
-  private var serviceStatus: LocationServiceStatus = Disabled
+  private var locationManager: LocationManager       = null
+  private var provider:        String                = null
+  private var serviceStatus:   LocationServiceStatus = Disabled
 
   def handleMessage(msg: Message): Boolean = {
     msg.obj match {
@@ -133,7 +137,7 @@ private[service] class Geomancer extends Handler.Callback {
 
   private def replyLocation(requester: HandlerActor): Unit = {
     val loc = locationManager.getLastKnownLocation(provider)
-    requester ! Option(loc)
+    requester ! LocationResult(Option(loc))
   }
 
   private def replyStatus(requester: HandlerActor): Unit = {

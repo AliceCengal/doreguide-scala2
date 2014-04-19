@@ -1,9 +1,7 @@
 package edu.vanderbilt.doreguide.service
 
 import android.content.Context
-import android.os.HandlerThread
-import roboguice.RoboGuice
-import com.google.inject.{Provider, Binder, Module}
+import android.os.{Handler, HandlerThread}
 
 /**
  * The starting point of the app process. Initiates the services.
@@ -12,14 +10,14 @@ import com.google.inject.{Provider, Binder, Module}
  */
 class Dore extends android.app.Application {
 
-  import Dore._
+  import Dore.Initialize
 
   private val IMAGE_SERVER_INDEX = 0
   private val PLACE_SERVER_INDEX = 1
   private val GEOMANCER_INDEX    = 2
 
-  private var handles: List[HandlerActor] = List.empty
-  private val eventbusHandle: HandlerActor = new HandlerActor(this.getMainLooper, new EventBus)
+  private var handles: List[HandlerActor]  = List.empty
+  private var eventbusHandle: Handler with ActorComponent = null
 
   override def onCreate() {
     super.onCreate()
@@ -32,11 +30,13 @@ class Dore extends android.app.Application {
 
   def geomancer: HandlerActor   = handles(GEOMANCER_INDEX)
 
-  def eventbus: HandlerActor    = eventbusHandle
+  def eventbus: Handler with  ActorComponent = eventbusHandle
 
   private def initializeGlobalState() {
     val thread = new HandlerThread("workerthread")
     thread.start()
+
+    eventbusHandle = new Handler(new EventBus) with ActorComponent
 
     handles =
         List(
@@ -51,30 +51,12 @@ class Dore extends android.app.Application {
 
     handles foreach { _ ! Initialize(this) }
 
-    RoboGuice.setBaseApplicationInjector(
-      this,
-      RoboGuice.DEFAULT_STAGE, new Module() {
-        def configure(binder: Binder): Unit = {
-          binder
-              .bind(classOf[Dore])
-              .toProvider(
-                new Provider[Dore]() {
-                  def get(): Dore = Dore.this
-                })
-        }
-      })
   }
 
 }
 
-object Dore {
+private[service] object Dore {
 
   private[service] case class Initialize(ctx: Context)
 
-  /**
-   * Indicates that a request to a Service Handler failed.
-   */
-  case class Failure(originalMessage: AnyRef,
-                     error:           Exception,
-                     extraInfo:       String)
 }

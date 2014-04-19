@@ -42,9 +42,9 @@ object ImageServer {
 
 private[service] class ImageServer extends Handler.Callback {
 
-  import Dore._
   import ImageServer._
   import scala.collection.JavaConverters._
+  import Dore.Initialize
 
   private var imageLoader: ImageLoader = null
   private var imageBank: Map[Int,String] = Map.empty
