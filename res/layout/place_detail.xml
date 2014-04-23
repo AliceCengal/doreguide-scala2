@@ -11,6 +11,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/light_gold"
+            android:animateLayoutChanges="true"
             android:padding="8dp">
 
         <edu.vanderbilt.vm.doreguide.views.AspectRatioImageView
@@ -33,6 +34,28 @@
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="4dp">
+
+            <ImageButton
+                    android:id="@+id/btn_map"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/location_map"/>
+
+            <ImageButton
+                    android:id="@+id/btn_heart"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/rating_important"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:background="@drawable/card"
                 android:orientation="vertical"
                 android:layout_margin="8dp"
@@ -49,29 +72,8 @@
                     android:id="@+id/tv_desc"
                     android:layout_margin="4dp"
                     style="@style/description_text_wall"
-                    android:text="@string/ipsum"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="4dp">
-
-            <ImageButton
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/location_map"/>
-
-            <ImageButton
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/rating_favorite"/>
 
         </LinearLayout>
 

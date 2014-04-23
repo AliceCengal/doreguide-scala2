@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@color/light_gold"
+              android:padding="8dp">
+
+    <TextView
+            android:textSize="26sp"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Heart List"
+            android:layout_margin="8dp"/>
+
+    <ListView
+            android:id="@+id/lv_heart"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:layout_margin="8dp"
+            android:padding="8dp"/>
+
+    <ImageButton
+            android:id="@+id/btn_map"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@drawable/location_map"/>
+
+</LinearLayout>

@@ -18,10 +18,20 @@ class HandlerActor(looper: Looper, callback: Handler.Callback)
 
 }
 
+class AsyncHandlerActor(looper: Looper,
+                        callback: Handler.Callback)
+    extends Handler(looper, callback)
+            with ActorComponent
+
+class SyncHandlerActor(callback: Handler.Callback)
+    extends Handler(callback)
+            with ActorComponent
+
 trait ActorComponent {
   self: Handler =>
 
   def !(msg: AnyRef): Unit = {
     Message.obtain(self, 0, msg).sendToTarget()
   }
+
 }
