@@ -18,7 +18,9 @@ class MainActivity extends Activity
 		setContentView(R.layout.activity_main)
     getFragmentManager.
         beginTransaction().
-        add(R.id.main_main, new PlaceDetailFrag, "PlaceDetailFrag").
+        add(R.id.main_main,
+            PlaceDetailFrag.showNearestPlace,
+            "PlaceDetailFrag").
         commit()
 	}
 
@@ -50,28 +52,16 @@ class MainActivity extends Activity
       super.onOptionsItemSelected(item)
     }
   }
-  /*
-  @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.stop, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_settings) {
-            AboutsActivity.open(this);
-            return true;
-        } else {
-            return super.onOptionsItemSelected(item);
-        }
-    }
-   */
 
   def handleMessage(msg: Message): Boolean = {
     msg.obj match {
       case PlaceDetailFrag.MapButtonClicked(plc) =>
+      case PlaceDetailFrag.NearbyPlaceSelected(plc) =>
+        getFragmentManager.
+        beginTransaction().
+        replace(R.id.main_main,
+                PlaceDetailFrag.showThisPlace(plc)).
+        commit()
       case _ =>
     }
     true

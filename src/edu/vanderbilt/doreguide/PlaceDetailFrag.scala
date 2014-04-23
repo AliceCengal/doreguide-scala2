@@ -1,7 +1,7 @@
 package edu.vanderbilt.doreguide
 
 import android.view.{View, LayoutInflater}
-import android.os.{Message, Handler}
+import android.os.{Bundle, Message, Handler}
 import android.app.Fragment
 import android.location.Location
 import android.widget.{Toast, ImageButton, ScrollView, LinearLayout, EditText, Button, ImageView, TextView}
@@ -44,13 +44,28 @@ class PlaceDetailFrag extends Fragment
   override def onStart() {
     super.onStart()
 
-    dore.eventbus ! EventBus.Subscribe(controller)
-    dore.geomancer ! (controller, Geomancer.GetLocation)
-
     btnSubmit.setOnClickListener(this)
     ivMainImage.setOnClickListener(this)
     btnHeart.setOnClickListener(this)
     btnMap.setOnClickListener(this)
+
+    dore.eventbus ! EventBus.Subscribe(controller)
+
+    val args = getArguments
+    if (args != null) {
+      if (args.containsKey(SHOW_NEAREST)) {
+        dore.geomancer ! (controller, Geomancer.GetLocation)
+
+      } else {
+        val placeId = args.getInt(SHOW_THIS_PLACE)
+        dore.placeServer !
+        (controller, PlaceServer.GetPlaceWithId(placeId))
+
+      }
+    } else {
+      throw new IllegalStateException("Please use the factory methods to instantiate this Fragment")
+    }
+
   }
 
   override def onStop() {
@@ -80,9 +95,17 @@ class PlaceDetailFrag extends Fragment
   }
 
   private def handlePlaces(plcs: List[Place]) {
-    displayPlace(plcs(0))
-    displayNearbyPlaces(plcs.tail)
-    component[ScrollView](R.id.sv_place_detail_parent).smoothScrollTo(0,0)
+    if (plcs.size == 1) {
+      val plc = plcs(0)
+      dore.placeServer !
+      (controller, PlaceServer.FindNClosest(plc.latitude,
+                                            plc.longitude,
+                                            NEARBY_COUNT + 1))
+    } else {
+      displayPlace(plcs(0))
+      displayNearbyPlaces(plcs.tail)
+      component[ScrollView](R.id.sv_place_detail_parent).smoothScrollTo(0,0)
+    }
   }
 
   private def displayPlace(plc: Place) {
@@ -109,35 +132,20 @@ class PlaceDetailFrag extends Fragment
       llNearby.removeViewAt(1)
     }
 
-    plcs.tail.foreach { plc =>
+    plcs.foreach { plc =>
       val tv = LayoutInflater.
                from(getActivity).
                inflate(R.layout.simple_text, null).
                asInstanceOf[TextView]
       tv.setText(plc.name)
-      tv.setOnClickListener(new OnClickListener() {
-        def onClick(p1: View): Unit = {
-          reset()
-
-          controller.postDelayed(new Runnable {
-            def run(): Unit = {
-              dore.placeServer !
-              (controller, PlaceServer.FindNClosest(plc.latitude,
-                                                    plc.longitude,
-                                                    NEARBY_COUNT + 1))
-            }
-          }, 1000)
-
-          component[ScrollView](R.id.sv_place_detail_parent).smoothScrollTo(0,0)
-        }
-      })
+      tv.setOnClickListener(createNearbyListDirective(plc))
 
       llNearby.addView(tv)}
   }
 
   private def setMainImage(img: Bitmap) {
-    ivMainImage.setImageBitmap(img)
     ivMainImage.setVisibility(View.VISIBLE)
+    ivMainImage.setImageBitmap(img)
   }
 
   def onClick(v: View): Unit = {
@@ -174,15 +182,10 @@ class PlaceDetailFrag extends Fragment
     Toast.makeText(this.getActivity, message, Toast.LENGTH_LONG).show()
   }
 
-  private def reset() {
-    tvTitle.setVisibility(View.GONE)
-    tvDescription.setVisibility(View.GONE)
-    ivMainImage.setVisibility(View.GONE)
-
-    while (llNearby.getChildCount > 1) {
-      llNearby.removeViewAt(1)
+  private def createNearbyListDirective(plc: Place) = new OnClickListener {
+    def onClick(p1: View): Unit = {
+      dore.eventbus ! NearbyPlaceSelected(plc)
     }
-    component[ScrollView](R.id.sv_place_detail_parent).smoothScrollTo(0,0)
   }
 
 }
@@ -194,5 +197,27 @@ object PlaceDetailFrag {
   case class MapButtonClicked(plc: Place)
 
   case class MainImageClicked(plc: Place)
+
+  case class NearbyPlaceSelected(nearby: Place)
+
+  private val SHOW_NEAREST = "show_nearest"
+  private val SHOW_THIS_PLACE = "show_this_place"
+
+
+  def showNearestPlace = {
+    val f = new PlaceDetailFrag
+    val b = new Bundle
+    b.putInt(SHOW_NEAREST, 1)
+    f.setArguments(b)
+    f
+  }
+
+  def showThisPlace(plc: Place) = {
+    val f = new PlaceDetailFrag
+    val b = new Bundle
+    b.putInt(SHOW_THIS_PLACE, plc.uniqueId)
+    f.setArguments(b)
+    f
+  }
 
 }

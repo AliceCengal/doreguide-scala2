@@ -15,8 +15,9 @@
             android:padding="8dp">
 
         <edu.vanderbilt.vm.doreguide.views.AspectRatioImageView
-                android:id="@+id/iv1"
+                android:visibility="gone"
                 android:src="@drawable/ic_launcher"
+                android:id="@+id/iv1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"/>
@@ -24,7 +25,6 @@
         <TextView
                 android:textSize="26sp"
                 android:id="@+id/tv_title"
-                android:text="@string/app_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
