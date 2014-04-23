@@ -4,13 +4,15 @@ import android.app.Fragment
 import android.os.{Message, Handler}
 import android.widget.TextView
 import android.view.View
-import edu.vanderbilt.doreguide.service.{HandlerActor, Geomancer}
-import edu.vanderbilt.doreguide.model.Place
-import edu.vanderbilt.doreguide.service.EventBus.{Unsubscribe, Subscribe}
 import android.view.View.OnClickListener
-import edu.vanderbilt.doreguide.MapUnderbarFrag.Display
+
+import edu.vanderbilt.doreguide.model.Place
+import service._
+import Geomancer._
 
 /**
+ * The map with its underbar
+ *
  * Created by athran on 4/20/14.
  */
 class PlacesMapFragment extends Fragment
@@ -19,7 +21,7 @@ class PlacesMapFragment extends Fragment
                                 with Handler.Callback {
 
   import PlacesMapFragment._
-  import Geomancer._
+
 
   def layoutId: Int = R.layout.simple_text
 
@@ -49,6 +51,8 @@ class MapUnderbarFrag extends Fragment
                               with FragmentViewUtil
                               with Handler.Callback {
 
+  import MapUnderbarFrag._
+
   def layoutId: Int = R.layout.simple_text
 
   lazy val controller = new HandlerActor(getActivity.getMainLooper, this)
@@ -58,7 +62,7 @@ class MapUnderbarFrag extends Fragment
 
   override def onStart() {
     super.onStart()
-    dore.eventbus ! Subscribe(controller)
+    dore.eventbus ! EventBus.Subscribe(controller)
     box.setOnClickListener(new OnClickListener {
       def onClick(p1: View): Unit = {
         dore.eventbus ! MapUnderbarFrag.MapUnderbarClicked(place)
@@ -68,7 +72,7 @@ class MapUnderbarFrag extends Fragment
 
   override def onStop() {
     super.onStop()
-    dore.eventbus ! Unsubscribe(controller)
+    dore.eventbus ! EventBus.Unsubscribe(controller)
   }
 
   def handleMessage(msg: Message): Boolean = {

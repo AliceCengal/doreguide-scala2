@@ -2,8 +2,9 @@ package edu.vanderbilt.doreguide
 
 import android.os.{Message, Handler, Bundle}
 import android.app.{Fragment, Activity}
-import edu.vanderbilt.doreguide.service.{HandlerActor, EventBus}
 import android.view.{MenuItem, Menu}
+
+import edu.vanderbilt.doreguide.service.{HandlerActor, EventBus}
 
 class MainActivity extends Activity
                            with SimpleInjections.ActivityInjection

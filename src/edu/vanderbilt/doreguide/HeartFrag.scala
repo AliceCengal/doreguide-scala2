@@ -1,13 +1,12 @@
 package edu.vanderbilt.doreguide
 
 import android.app.Fragment
-import edu.vanderbilt.doreguide.service.HandlerActor
 import android.os.{Message, Handler}
 import android.widget.{ImageButton, AdapterView, ListView}
 import android.view.View
+
 import edu.vanderbilt.doreguide.ArrayAdapterBuilder.ToString
 import edu.vanderbilt.doreguide.model.Place
-import edu.vanderbilt.doreguide.service.EventBus.{Unsubscribe, Subscribe}
 
 /**
  * A page showing all hearted Places
@@ -20,6 +19,8 @@ class HeartFrag extends Fragment
                         with Handler.Callback
                         with AdapterView.OnItemClickListener
                         with View.OnClickListener {
+
+  import service._
 
   def layoutId = R.layout.heart_list
 
@@ -49,12 +50,12 @@ class HeartFrag extends Fragment
     list.setOnItemClickListener(this)
     btnMap.setOnClickListener(this)
 
-    dore.eventbus ! Subscribe(controller)
+    dore.eventbus ! EventBus.Subscribe(controller)
   }
 
   override def onStop() {
     super.onStop()
-    dore.eventbus ! Unsubscribe(controller)
+    dore.eventbus ! EventBus.Unsubscribe(controller)
   }
 
   def onItemClick(p1: AdapterView[_],

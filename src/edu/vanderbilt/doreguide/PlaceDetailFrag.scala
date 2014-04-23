@@ -3,16 +3,12 @@ package edu.vanderbilt.doreguide
 import android.view.{View, LayoutInflater}
 import android.os.{Message, Handler}
 import android.app.Fragment
-import edu.vanderbilt.doreguide.service.{ImageServer, PlaceServer, EventBus, HandlerActor}
-import edu.vanderbilt.doreguide.service.Geomancer.{LocationResult, GetLocation}
 import android.location.Location
-import edu.vanderbilt.doreguide.service.PlaceServer.{FindNClosest, PlaceResult}
-import edu.vanderbilt.doreguide.model.Place
 import android.widget.{Toast, ImageButton, ScrollView, LinearLayout, EditText, Button, ImageView, TextView}
 import android.graphics.Bitmap
 import android.view.View.OnClickListener
-import edu.vanderbilt.doreguide.service.FeedbackServer.Comment
-import edu.vanderbilt.doreguide.PlaceDetailFrag.{MainImageClicked, MapButtonClicked}
+
+import edu.vanderbilt.doreguide.model.Place
 
 /**
  * The page that displays the details of a Place
@@ -25,7 +21,8 @@ class PlaceDetailFrag extends Fragment
                               with FragmentViewUtil
                               with View.OnClickListener{
 
-  val NEARBY_COUNT = 10
+  import PlaceDetailFrag._
+  import service._
 
   lazy val controller = new HandlerActor(this.getActivity.getMainLooper, this)
   var place: Place = null
@@ -46,9 +43,9 @@ class PlaceDetailFrag extends Fragment
 
   override def onStart() {
     super.onStart()
-    reset()
+
     dore.eventbus ! EventBus.Subscribe(controller)
-    dore.geomancer ! (controller, GetLocation)
+    dore.geomancer ! (controller, Geomancer.GetLocation)
 
     btnSubmit.setOnClickListener(this)
     ivMainImage.setOnClickListener(this)
@@ -63,10 +60,10 @@ class PlaceDetailFrag extends Fragment
 
   def handleMessage(msg: Message): Boolean = {
     msg.obj match {
-      case LocationResult(maybeLoc)    => handleLoc(maybeLoc)
-      case PlaceResult(plcs)           => handlePlaces(plcs)
-      case ImageServer.Image(url, img) => setMainImage(img)
-      case _ =>
+      case Geomancer.LocationResult(maybeLoc) => handleLoc(maybeLoc)
+      case PlaceServer.PlaceResult(plcs)      => handlePlaces(plcs)
+      case ImageServer.Image(url, img)        => setMainImage(img)
+      case _                                  =>
     }
     true
   }
@@ -124,9 +121,10 @@ class PlaceDetailFrag extends Fragment
 
           controller.postDelayed(new Runnable {
             def run(): Unit = {
-              dore.placeServer ! (controller, FindNClosest(plc.latitude,
-                                                           plc.longitude,
-                                                           NEARBY_COUNT + 1))
+              dore.placeServer !
+              (controller, PlaceServer.FindNClosest(plc.latitude,
+                                                    plc.longitude,
+                                                    NEARBY_COUNT + 1))
             }
           }, 1000)
 
@@ -152,7 +150,7 @@ class PlaceDetailFrag extends Fragment
       } else if (body == null || body.isEmpty) {
         showToast("Please include your feedback")
       } else {
-        dore.feedback ! Comment(email, body)
+        dore.feedback ! FeedbackServer.Comment(email, body)
       }
 
     } else if (v == btnHeart) {
@@ -190,6 +188,8 @@ class PlaceDetailFrag extends Fragment
 }
 
 object PlaceDetailFrag {
+
+  val NEARBY_COUNT = 10
 
   case class MapButtonClicked(plc: Place)
 
