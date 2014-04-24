@@ -14,6 +14,7 @@ object Geomancer {
   val DEFAULT_LONGITUDE = -86.803889
   val DEFAULT_LATITUDE  = 36.147381
   val DEFAULT_LOC       = initDefaultLocation
+  val DEFAULT_ZOOM      = 14.5f
 
   val FEET_PER_METER = 3.28083989501312
   val FEET_PER_MILE  = 5280

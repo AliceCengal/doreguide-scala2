@@ -211,11 +211,11 @@ object PlaceDetailFrag {
     }
   }
 
-  private trait DetailBehaviour {
+  trait DetailBehaviour {
     def init()
   }
 
-  private trait ShowNearest extends DetailBehaviour {
+  trait ShowNearest extends DetailBehaviour {
     self: PlaceDetailFrag =>
 
     def init() {
@@ -224,7 +224,7 @@ object PlaceDetailFrag {
 
   }
 
-  private trait ShowPlace extends DetailBehaviour {
+  trait ShowPlace extends DetailBehaviour {
     self: PlaceDetailFrag =>
 
     def placeId: Int

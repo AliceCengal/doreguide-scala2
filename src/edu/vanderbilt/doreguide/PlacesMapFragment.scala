@@ -10,8 +10,10 @@ import edu.vanderbilt.doreguide.model.Place
 import service._
 import Geomancer._
 import edu.vanderbilt.doreguide.view.{SimpleInjections, FragmentViewUtil}
-import com.google.android.gms.maps.MapFragment
+import com.google.android.gms.maps.{CameraUpdateFactory, MapFragment}
 import edu.vanderbilt.doreguide.PlacesMapFragment.MapBehaviour
+import com.google.android.gms.maps.model.{Marker, LatLng, MarkerOptions}
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 
 /**
  * The map with its underbar
@@ -26,25 +28,62 @@ class PlacesMapFragment extends MapFragment
 
   import PlacesMapFragment._
 
-
-
-  def handleMessage(p1: Message): Boolean = {
+  def handleMessage(msg: Message): Boolean = {
+    handleSpecial(msg.obj)
     true
   }
 
   override def onResume() {
     super.onResume()
-
     init()
   }
 
 }
 
 object PlacesMapFragment {
+
   case class MarkerClicked(lat: Double, lng: Double)
+
+  def showHearted = {
+    new PlacesMapFragment with ShowHearted
+  }
 
   trait MapBehaviour {
     def init()
+    def handleSpecial(msg: AnyRef) {}
+  }
+
+  trait ShowHearted extends MapBehaviour{
+    self: PlacesMapFragment =>
+
+    def init() {
+
+      val googleMap = getMap
+
+      googleMap.moveCamera(CameraUpdateFactory.
+                           newLatLngZoom(new LatLng(Geomancer.DEFAULT_LATITUDE,
+                                                    Geomancer.DEFAULT_LONGITUDE),
+                                         Geomancer.DEFAULT_ZOOM))
+      for (plc <- dore.getAllHearted) {
+        googleMap.addMarker(new MarkerOptions().
+                            draggable(false).
+                            position(new LatLng(plc.latitude,
+                                                plc.longitude)).
+                            title(plc.name))
+      }
+
+      googleMap.setOnMarkerClickListener(new OnMarkerClickListener {
+        def onMarkerClick(marker: Marker): Boolean = {
+          dore.eventbus ! MarkerClicked(marker.getPosition.latitude,
+                                        marker.getPosition.longitude)
+          googleMap.animateCamera(CameraUpdateFactory.
+                                  newLatLng(marker.getPosition))
+          true
+        }
+      })
+
+    }
+
   }
 
 }

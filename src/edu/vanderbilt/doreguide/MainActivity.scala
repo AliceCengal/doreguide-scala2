@@ -56,6 +56,13 @@ class MainActivity extends Activity
 
   def handleMessage(msg: Message): Boolean = {
     msg.obj match {
+      case HeartFrag.MapButtonClicked =>
+        getFragmentManager.
+        beginTransaction().
+        addToBackStack(null).
+        replace(R.id.main_main,
+                PlacesMapFragment.showHearted).
+        commit()
       case PlaceDetailFrag.MapButtonClicked(plc) =>
       case PlaceDetailFrag.NearbyPlaceSelected(plc) =>
         getFragmentManager.
