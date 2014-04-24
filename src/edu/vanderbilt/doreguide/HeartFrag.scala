@@ -5,7 +5,8 @@ import android.os.{Message, Handler}
 import android.widget.{ImageButton, AdapterView, ListView}
 import android.view.View
 
-import edu.vanderbilt.doreguide.ArrayAdapterBuilder.ToString
+import edu.vanderbilt.doreguide.view.{SimpleInjections, FragmentViewUtil, ArrayAdapterBuilder}
+import ArrayAdapterBuilder.ToString
 import edu.vanderbilt.doreguide.model.Place
 
 /**

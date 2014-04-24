@@ -1,4 +1,4 @@
-package edu.vanderbilt.doreguide
+package edu.vanderbilt.doreguide.view
 
 import android.app.{Fragment, Activity}
 import edu.vanderbilt.doreguide.service.Dore

@@ -9,41 +9,44 @@ import android.view.View.OnClickListener
 import edu.vanderbilt.doreguide.model.Place
 import service._
 import Geomancer._
+import edu.vanderbilt.doreguide.view.{SimpleInjections, FragmentViewUtil}
+import com.google.android.gms.maps.MapFragment
+import edu.vanderbilt.doreguide.PlacesMapFragment.MapBehaviour
 
 /**
  * The map with its underbar
  *
  * Created by athran on 4/20/14.
  */
-class PlacesMapFragment extends Fragment
+class PlacesMapFragment extends MapFragment
                                 with SimpleInjections.FragmentInjection
-                                with FragmentViewUtil
                                 with Handler.Callback {
+
+  self: MapBehaviour =>
 
   import PlacesMapFragment._
 
 
-  def layoutId: Int = R.layout.simple_text
 
   def handleMessage(p1: Message): Boolean = {
     true
   }
 
-  override def onStart() {
-    super.onStart()
+  override def onResume() {
+    super.onResume()
 
-    component[TextView](R.id.tv_title).setOnClickListener(new View.OnClickListener() {
-      def onClick(p1: View): Unit = {
-        dore.eventbus ! MarkerClicked(DEFAULT_LATITUDE,
-                                      DEFAULT_LONGITUDE)
-      }
-    })
+    init()
   }
 
 }
 
 object PlacesMapFragment {
   case class MarkerClicked(lat: Double, lng: Double)
+
+  trait MapBehaviour {
+    def init()
+  }
+
 }
 
 class MapUnderbarFrag extends Fragment

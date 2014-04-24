@@ -5,6 +5,7 @@ import android.app.{Fragment, Activity}
 import android.view.{MenuItem, Menu}
 
 import edu.vanderbilt.doreguide.service.{HandlerActor, EventBus}
+import edu.vanderbilt.doreguide.view.SimpleInjections
 
 class MainActivity extends Activity
                            with SimpleInjections.ActivityInjection

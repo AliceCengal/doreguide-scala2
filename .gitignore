@@ -11,6 +11,7 @@
 # Generated files
 bin/
 gen/
+gen-external-apklibs/
 
 # Gradle files
 .gradle/
@@ -37,6 +38,8 @@ maps_api_key.xml
 out/
 *.orig
 target/
+
+build.xml
 
 # vim artifact
 *.swp

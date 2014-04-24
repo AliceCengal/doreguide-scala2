@@ -1,4 +1,4 @@
-package edu.vanderbilt.doreguide;
+package edu.vanderbilt.doreguide.view;
 
 import java.util.Arrays;
 import java.util.LinkedList;

@@ -1,7 +1,7 @@
 package edu.vanderbilt.doreguide
 
 import android.view.{View, LayoutInflater}
-import android.os.{Bundle, Message, Handler}
+import android.os.{Message, Handler}
 import android.app.Fragment
 import android.location.Location
 import android.widget.{Toast, ImageButton, ScrollView, LinearLayout, EditText, Button, ImageView, TextView}
@@ -9,6 +9,8 @@ import android.graphics.Bitmap
 import android.view.View.OnClickListener
 
 import edu.vanderbilt.doreguide.model.Place
+import edu.vanderbilt.doreguide.view.{SimpleInjections, FragmentViewUtil}
+import edu.vanderbilt.doreguide.service.{PlaceServer, Geomancer}
 
 /**
  * The page that displays the details of a Place
@@ -20,6 +22,8 @@ class PlaceDetailFrag extends Fragment
                               with Handler.Callback
                               with FragmentViewUtil
                               with View.OnClickListener{
+
+  self: PlaceDetailFrag.DetailBehaviour =>
 
   import PlaceDetailFrag._
   import service._
@@ -50,22 +54,7 @@ class PlaceDetailFrag extends Fragment
     btnMap.setOnClickListener(this)
 
     dore.eventbus ! EventBus.Subscribe(controller)
-
-    val args = getArguments
-    if (args != null) {
-      if (args.containsKey(SHOW_NEAREST)) {
-        dore.geomancer ! (controller, Geomancer.GetLocation)
-
-      } else {
-        val placeId = args.getInt(SHOW_THIS_PLACE)
-        dore.placeServer !
-        (controller, PlaceServer.GetPlaceWithId(placeId))
-
-      }
-    } else {
-      throw new IllegalStateException("Please use the factory methods to instantiate this Fragment")
-    }
-
+    init()
   }
 
   override def onStop() {
@@ -144,8 +133,12 @@ class PlaceDetailFrag extends Fragment
   }
 
   private def setMainImage(img: Bitmap) {
-    ivMainImage.setVisibility(View.VISIBLE)
     ivMainImage.setImageBitmap(img)
+    controller.postDelayed(new Runnable(){
+      def run(): Unit = {
+        ivMainImage.setVisibility(View.VISIBLE)
+      }
+    }, 1000)
   }
 
   def onClick(v: View): Unit = {
@@ -200,24 +193,37 @@ object PlaceDetailFrag {
 
   case class NearbyPlaceSelected(nearby: Place)
 
-  private val SHOW_NEAREST = "show_nearest"
-  private val SHOW_THIS_PLACE = "show_this_place"
-
-
   def showNearestPlace = {
-    val f = new PlaceDetailFrag
-    val b = new Bundle
-    b.putInt(SHOW_NEAREST, 1)
-    f.setArguments(b)
-    f
+    new PlaceDetailFrag with ShowNearest
   }
 
   def showThisPlace(plc: Place) = {
-    val f = new PlaceDetailFrag
-    val b = new Bundle
-    b.putInt(SHOW_THIS_PLACE, plc.uniqueId)
-    f.setArguments(b)
-    f
+    new PlaceDetailFrag with ShowPlace {
+      def placeId = plc.uniqueId
+    }
+  }
+
+  trait DetailBehaviour {
+    def init()
+  }
+
+  trait ShowNearest extends DetailBehaviour {
+    self: PlaceDetailFrag =>
+
+    def init() {
+      dore.geomancer ! (controller, Geomancer.GetLocation)
+    }
+
+  }
+
+  trait ShowPlace extends DetailBehaviour {
+    self: PlaceDetailFrag =>
+
+    def placeId: Int
+
+    def init() {
+      dore.placeServer ! (controller, PlaceServer.GetPlaceWithId(placeId))
+    }
   }
 
 }
