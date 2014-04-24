@@ -143,31 +143,39 @@ class PlaceDetailFrag extends Fragment
 
   def onClick(v: View): Unit = {
     if (v == btnSubmit) {
-      val email = etEmail.getText.toString
-      val body = etContent.getText.toString
-
-      if (email == null || email.isEmpty) {
-        showToast("Please put in your email address")
-      } else if (body == null || body.isEmpty) {
-        showToast("Please include your feedback")
-      } else {
-        dore.feedback ! FeedbackServer.Comment(email, body)
-      }
+      doCommentSend()
 
     } else if (v == btnHeart) {
-      if (dore.isHearted(place)) {
-        dore.unheart(place)
-        btnHeart.setImageResource(R.drawable.rating_important)
-      } else {
-        dore.heart(place)
-        btnHeart.setImageResource(R.drawable.rating_not_important)
-      }
+      doHeartToggle()
 
     } else if (v == btnMap) {
       dore.eventbus ! MapButtonClicked(place)
 
     } else if (v == ivMainImage) {
       dore.eventbus ! MainImageClicked(place)
+    }
+  }
+
+  private def doCommentSend() {
+    val email = etEmail.getText.toString
+    val body = etContent.getText.toString
+
+    if (email == null || email.isEmpty) {
+      showToast("Please put in your email address")
+    } else if (body == null || body.isEmpty) {
+      showToast("Please include your feedback")
+    } else {
+      dore.feedback ! FeedbackServer.Comment(email, body)
+    }
+  }
+
+  private def doHeartToggle() {
+    if (dore.isHearted(place)) {
+      dore.unheart(place)
+      btnHeart.setImageResource(R.drawable.rating_important)
+    } else {
+      dore.heart(place)
+      btnHeart.setImageResource(R.drawable.rating_not_important)
     }
   }
 
@@ -203,11 +211,11 @@ object PlaceDetailFrag {
     }
   }
 
-  trait DetailBehaviour {
+  private trait DetailBehaviour {
     def init()
   }
 
-  trait ShowNearest extends DetailBehaviour {
+  private trait ShowNearest extends DetailBehaviour {
     self: PlaceDetailFrag =>
 
     def init() {
@@ -216,7 +224,7 @@ object PlaceDetailFrag {
 
   }
 
-  trait ShowPlace extends DetailBehaviour {
+  private trait ShowPlace extends DetailBehaviour {
     self: PlaceDetailFrag =>
 
     def placeId: Int
