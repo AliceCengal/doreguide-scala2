@@ -1,6 +1,5 @@
 package edu.vanderbilt.doreguide.service
 
-import android.os.{Message, Handler}
 import java.text.DecimalFormat
 import android.location.{Criteria, LocationManager, Location}
 import android.content.Context
@@ -105,25 +104,23 @@ object Geomancer {
 
 }
 
-private[service] class Geomancer extends Handler.Callback {
+private[service] class Geomancer extends HandlerActor.Server {
 
   import Geomancer._
-  import Dore.Initialize
 
   private var locationManager: LocationManager       = null
   private var provider:        String                = null
   private var serviceStatus:   LocationServiceStatus = Disabled
 
-  def handleMessage(msg: Message): Boolean = {
-    msg.obj match {
-      case Initialize(ctx)                        => init(ctx)
-      case (requester: HandlerActor, GetLocation) => replyLocation(requester)
-      case (requester: HandlerActor, GetStatus)   => replyStatus(requester)
+  def handleRequest(req: AnyRef) {
+    req match {
+      case GetLocation => replyLocation(requester)
+      case GetStatus   => replyStatus(requester)
     }
     true
   }
 
-  private def init(ctx: Context): Unit = {
+  def init(ctx: Context): Unit = {
     locationManager =
         ctx.
             getSystemService(Context.LOCATION_SERVICE).

@@ -1,6 +1,5 @@
 package edu.vanderbilt.doreguide.service
 
-import android.os.{Message, Handler}
 import android.graphics.Bitmap
 import android.content.Context
 import com.nostra13.universalimageloader.core.{ImageLoaderConfiguration, DisplayImageOptions, ImageLoader}
@@ -40,27 +39,24 @@ object ImageServer {
   val rawUrl = "https://raw2.github.com/AliceCengal/vanderbilt-data/master/images.json"
 }
 
-private[service] class ImageServer extends Handler.Callback {
+private[service] class ImageServer extends HandlerActor.Server {
 
   import ImageServer._
   import scala.collection.JavaConverters._
-  import Dore.Initialize
 
   private var imageLoader: ImageLoader = null
   private var imageBank: Map[Int,String] = Map.empty
 
-  def handleMessage(msg: Message): Boolean = {
-    msg.obj match {
-      case Initialize(ctx)                            => init(ctx)
-      case (r: HandlerActor, DispatchImage(url))      => dispatchImage(r, url)
-      case (r: HandlerActor, DispatchImageFromId(id)) => dispatchImage(r, imageBank(id))
-    }
-    true
-  }
-
-  private def init(ctx: Context): Unit = {
+  def init(ctx: Context): Unit = {
     initImageBank()
     initImageLoader(ctx)
+  }
+
+  def handleRequest(req: AnyRef) {
+    req match {
+      case DispatchImage(url) => dispatchImage(requester, url)
+      case DispatchImageFromId(id) => dispatchImage(requester, imageBank(id))
+    }
   }
 
   private def initImageBank(): Unit = {

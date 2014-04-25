@@ -1,6 +1,6 @@
 package edu.vanderbilt.doreguide.service
 
-import android.os.{Message, Handler}
+import android.content.Context
 
 /**
  * Created by athran on 4/19/14.
@@ -11,10 +11,8 @@ object FeedbackServer {
 
 }
 
-private[service] class FeedbackServer extends Handler.Callback {
+private[service] class FeedbackServer extends HandlerActor.Server {
+  def init(ctx: Context): Unit = {}
 
-  def handleMessage(msg: Message): Boolean = {
-    true
-  }
-
+  def handleRequest(req: AnyRef): Unit = {}
 }

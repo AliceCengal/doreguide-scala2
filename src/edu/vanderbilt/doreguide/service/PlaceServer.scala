@@ -8,8 +8,6 @@ import android.content.Context
 import com.google.gson.JsonParser
 
 import edu.vanderbilt.doreguide.model.Place
-import edu.vanderbilt.doreguide.service.HandlerActor.Server
-
 
 /**
  * Fetches and caches place data
@@ -65,7 +63,7 @@ object PlaceServer {
 
 }
 
-private[service] class PlaceServer extends Server {
+private[service] class PlaceServer extends HandlerActor.Server {
 
   import PlaceServer._
   import scala.collection.JavaConverters._
@@ -157,6 +155,5 @@ private[service] class PlaceServer extends Server {
 
     requester ! PlaceResult(closestN)
   }
-
 
 }

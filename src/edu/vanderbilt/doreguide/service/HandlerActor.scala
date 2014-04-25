@@ -56,9 +56,9 @@ object HandlerActor {
 
   abstract class Server extends Handler.Callback {
 
-    def init(ctx: Context)
+    def init(ctx: Context): Unit
 
-    def handleRequest(req: AnyRef)
+    def handleRequest(req: AnyRef): Unit
 
     var requester: HandlerActor = null
 
