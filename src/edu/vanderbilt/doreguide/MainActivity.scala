@@ -11,7 +11,7 @@ class MainActivity extends Activity
                            with SimpleInjections.ActivityInjection
                            with Handler.Callback {
 
-  lazy val communicator = new HandlerActor(this.getMainLooper, this)
+  lazy val communicator = HandlerActor.sync(this)
   var currentFragment: Fragment = null
 
 	override def onCreate(saved: Bundle) {

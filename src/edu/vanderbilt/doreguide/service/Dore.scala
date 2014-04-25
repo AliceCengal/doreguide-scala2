@@ -1,9 +1,11 @@
 package edu.vanderbilt.doreguide.service
 
+import scala.collection.mutable
+
 import android.content.Context
 import android.os.HandlerThread
+
 import edu.vanderbilt.doreguide.model.Place
-import scala.collection.mutable
 
 /**
  * The starting point of the app process. Initiates the services.
@@ -19,9 +21,9 @@ class Dore extends android.app.Application {
   private val GEOMANCER_INDEX    = 2
   private val FEEDBACK_INDEX     = 3
 
-  private var handles             = List.empty[HandlerActor]
-  private lazy val eventbusHandle = new SyncHandlerActor(new EventBus)
-  private val heartedSet          = mutable.Set.empty[Place]
+  private var handles        = List.empty[HandlerActor]
+  private val eventbusHandle = HandlerActor.sync(new EventBus)
+  private val heartedSet     = mutable.Set.empty[Place]
 
   override def onCreate() {
     super.onCreate()
@@ -36,7 +38,7 @@ class Dore extends android.app.Application {
 
   def feedback: HandlerActor    = handles(FEEDBACK_INDEX)
 
-  def eventbus: SyncHandlerActor    = eventbusHandle
+  def eventbus: HandlerActor    = eventbusHandle
 
   def heart(plc: Place): Unit = {
     heartedSet.add(plc)
@@ -56,8 +58,6 @@ class Dore extends android.app.Application {
     val thread = new HandlerThread("workerthread")
     thread.start()
 
-    //eventbusHandle =
-
     handles =
         List(
           new ImageServer,
@@ -66,7 +66,7 @@ class Dore extends android.app.Application {
           new FeedbackServer).
             map(
               callback =>
-                new HandlerActor(
+                HandlerActor.async(
                   thread.getLooper,
                   callback))
 

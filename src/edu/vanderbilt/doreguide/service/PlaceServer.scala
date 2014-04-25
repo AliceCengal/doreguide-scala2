@@ -1,10 +1,15 @@
 package edu.vanderbilt.doreguide.service
 
-import android.os.{Message, Handler}
-import edu.vanderbilt.doreguide.model.Place
-import com.google.gson.JsonParser
 import java.net.URL
 import java.io.InputStreamReader
+
+import android.content.Context
+
+import com.google.gson.JsonParser
+
+import edu.vanderbilt.doreguide.model.Place
+import edu.vanderbilt.doreguide.service.HandlerActor.Server
+
 
 /**
  * Fetches and caches place data
@@ -60,28 +65,25 @@ object PlaceServer {
 
 }
 
-private[service] class PlaceServer extends Handler.Callback {
+private[service] class PlaceServer extends Server {
 
   import PlaceServer._
   import scala.collection.JavaConverters._
   import Geomancer.calcDistance
-  import Dore.Initialize
 
   private var placeBank: Map[Int,Place] = Map.empty
 
-  def handleMessage(msg: Message): Boolean = {
-    msg.obj match {
-      case Initialize(ctx)                               => init()
-      case (r: HandlerActor, GetPlaceWithId(id))         => sendPlaceWithId(r, id)
-      case (r: HandlerActor, GetPlacesIdRange(ids))      => sendPlacesWithIDs(r, ids)
-      case (r: HandlerActor, GetAllPlaces)               => sendAllPlaces(r)
-      case (r: HandlerActor, FindClosestPlace(lat, lng)) => sendClosestPlace(r, (lat,lng))
-      case (r: HandlerActor, FindNClosest(lat, lng, n))  => sendNClosestPlace(r, (lat,lng), n)
+  def handleRequest(req: AnyRef) {
+    req match {
+      case GetPlaceWithId(id)         => sendPlaceWithId(id)
+      case GetPlacesIdRange(ids)      => sendPlacesWithIDs(ids)
+      case GetAllPlaces               => sendAllPlaces()
+      case FindClosestPlace(lat, lng) => sendClosestPlace((lat,lng))
+      case FindNClosest(lat, lng, n)  => sendNClosestPlace((lat,lng), n)
     }
-    true
   }
 
-  private def init(): Unit = {
+  def init(ctx: Context): Unit = {
     this.placeBank =
       new JsonParser()
           .parse(
@@ -97,12 +99,12 @@ private[service] class PlaceServer extends Handler.Callback {
           .toMap
   }
 
-  private def sendPlaceWithId(requester: HandlerActor, id: Int) {
+  private def sendPlaceWithId(id: Int) {
     val maybePlc = placeBank.get(id)
     requester ! PlaceResult(if (maybePlc.isDefined) List(maybePlc.get) else List())
   }
 
-  private def sendPlacesWithIDs(requester: HandlerActor, ids: List[Int]) {
+  private def sendPlacesWithIDs(ids: List[Int]) {
     requester ! PlaceResult(
                              ids.
                              map(id => placeBank.get(id)).
@@ -111,11 +113,11 @@ private[service] class PlaceServer extends Handler.Callback {
                            )
   }
 
-  private def sendAllPlaces(requester: HandlerActor) {
+  private def sendAllPlaces() {
     requester ! PlaceResult(placeBank.values.toList)
   }
 
-  private def sendClosestPlace(requester: HandlerActor, coordinate: (Double,Double)) {
+  private def sendClosestPlace(coordinate: (Double,Double)) {
 
     def distanceToReference(plc: Place): Double = {
       calcDistance(
@@ -137,8 +139,7 @@ private[service] class PlaceServer extends Handler.Callback {
     requester ! PlaceResult(List(closest))
   }
 
-  private def sendNClosestPlace(requester: HandlerActor,
-                                coordinate: (Double,Double),
+  private def sendNClosestPlace(coordinate: (Double,Double),
                                 n: Int) {
     def distanceToReference(plc: Place): Double = {
       calcDistance(

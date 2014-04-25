@@ -25,9 +25,9 @@ class HeartFrag extends Fragment
 
   def layoutId = R.layout.heart_list
 
-  lazy val controller = new HandlerActor(this.getActivity.getMainLooper, this)
+  lazy val controller = HandlerActor.sync(this)
 
-  def list = component[ListView](R.id.lv_heart)
+  def list   = component[ListView](R.id.lv_heart)
   def btnMap = component[ImageButton](R.id.btn_map)
 
   def handleMessage(msg: Message): Boolean = {

@@ -10,7 +10,7 @@ import android.view.View.OnClickListener
 
 import edu.vanderbilt.doreguide.model.Place
 import edu.vanderbilt.doreguide.view.{SimpleInjections, FragmentViewUtil}
-import edu.vanderbilt.doreguide.service.{PlaceServer, Geomancer}
+import edu.vanderbilt.doreguide.service.{HandlerActor, PlaceServer, Geomancer}
 
 /**
  * The page that displays the details of a Place
@@ -21,15 +21,18 @@ class PlaceDetailFrag extends Fragment
                               with SimpleInjections.FragmentInjection
                               with Handler.Callback
                               with FragmentViewUtil
-                              with View.OnClickListener{
+                              with View.OnClickListener
+                              with HandlerActor.ImplicitRequester {
 
   self: PlaceDetailFrag.DetailBehaviour =>
 
   import PlaceDetailFrag._
   import service._
 
-  lazy val controller = new HandlerActor(this.getActivity.getMainLooper, this)
+  lazy val controller = HandlerActor.sync(this)
   var place: Place = null
+
+  implicit val requester = controller
 
   def tvTitle       = component[TextView](R.id.tv_title)
   def ivMainImage   = component[ImageView](R.id.iv1)
@@ -55,6 +58,7 @@ class PlaceDetailFrag extends Fragment
 
     dore.eventbus ! EventBus.Subscribe(controller)
     init()
+
   }
 
   override def onStop() {
@@ -77,9 +81,12 @@ class PlaceDetailFrag extends Fragment
     import PlaceServer.FindNClosest
 
     for (loc <- maybeLoc) {
-      dore.placeServer ! (controller, FindNClosest(loc.getLatitude,
-                                                   loc.getLongitude,
-                                                   NEARBY_COUNT + 1))
+      //dore.placeServer ! (controller, FindNClosest(loc.getLatitude,
+      //                                             loc.getLongitude,
+      //                                             NEARBY_COUNT + 1))
+      dore.placeServer request FindNClosest(loc.getLatitude,
+                                            loc.getLongitude,
+                                            NEARBY_COUNT + 1)
     }
   }
 

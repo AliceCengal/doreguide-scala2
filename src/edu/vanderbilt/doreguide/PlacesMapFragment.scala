@@ -97,7 +97,7 @@ class MapUnderbarFrag extends Fragment
 
   def layoutId: Int = R.layout.simple_text
 
-  lazy val controller = new HandlerActor(getActivity.getMainLooper, this)
+  lazy val controller = HandlerActor.sync(this)
   var place: Place = null
 
   def box = component[TextView](R.id.tv_title)
