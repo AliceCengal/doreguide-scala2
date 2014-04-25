@@ -78,6 +78,7 @@ private[service] class PlaceServer extends HandlerActor.Server {
       case GetAllPlaces               => sendAllPlaces()
       case FindClosestPlace(lat, lng) => sendClosestPlace((lat,lng))
       case FindNClosest(lat, lng, n)  => sendNClosestPlace((lat,lng), n)
+      case _                          =>
     }
   }
 

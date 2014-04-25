@@ -81,9 +81,6 @@ class PlaceDetailFrag extends Fragment
     import PlaceServer.FindNClosest
 
     for (loc <- maybeLoc) {
-      //dore.placeServer ! (controller, FindNClosest(loc.getLatitude,
-      //                                             loc.getLongitude,
-      //                                             NEARBY_COUNT + 1))
       dore.placeServer request FindNClosest(loc.getLatitude,
                                             loc.getLongitude,
                                             NEARBY_COUNT + 1)

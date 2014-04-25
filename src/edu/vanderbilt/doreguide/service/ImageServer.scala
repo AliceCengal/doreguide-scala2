@@ -54,8 +54,9 @@ private[service] class ImageServer extends HandlerActor.Server {
 
   def handleRequest(req: AnyRef) {
     req match {
-      case DispatchImage(url) => dispatchImage(requester, url)
+      case DispatchImage(url)      => dispatchImage(requester, url)
       case DispatchImageFromId(id) => dispatchImage(requester, imageBank(id))
+      case _                       =>
     }
   }
 

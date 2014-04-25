@@ -8,7 +8,6 @@ import android.view.View.OnClickListener
 
 import edu.vanderbilt.doreguide.model.Place
 import service._
-import Geomancer._
 import edu.vanderbilt.doreguide.view.{SimpleInjections, FragmentViewUtil}
 import com.google.android.gms.maps.{CameraUpdateFactory, MapFragment}
 import edu.vanderbilt.doreguide.PlacesMapFragment.MapBehaviour
@@ -25,8 +24,6 @@ class PlacesMapFragment extends MapFragment
                                 with Handler.Callback {
 
   self: MapBehaviour =>
-
-  import PlacesMapFragment._
 
   def handleMessage(msg: Message): Boolean = {
     handleSpecial(msg.obj)

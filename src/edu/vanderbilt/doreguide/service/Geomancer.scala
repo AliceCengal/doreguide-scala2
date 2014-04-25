@@ -116,6 +116,7 @@ private[service] class Geomancer extends HandlerActor.Server {
     req match {
       case GetLocation => replyLocation(requester)
       case GetStatus   => replyStatus(requester)
+      case _           =>
     }
     true
   }
