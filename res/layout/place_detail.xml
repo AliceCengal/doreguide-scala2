@@ -10,7 +10,7 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/light_gold"
+            android:background="@color/brighter_gold"
             android:animateLayoutChanges="true"
             android:padding="8dp">
 
@@ -25,6 +25,7 @@
         <TextView
                 android:textSize="26sp"
                 android:id="@+id/tv_title"
+
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"

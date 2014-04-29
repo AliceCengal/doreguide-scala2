@@ -118,7 +118,6 @@ private[service] class Geomancer extends HandlerActor.Server {
       case GetStatus   => replyStatus(requester)
       case _           =>
     }
-    true
   }
 
   def init(ctx: Context): Unit = {

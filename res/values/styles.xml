@@ -17,11 +17,15 @@
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
 
-    <color name="dark_gold">#A28448</color>
-    <color name="light_gold">#ffffdc</color>
-    <color name="decent_gold">#B69000</color>
-    <color name="pure_gold">#F0CE2E</color>
     <color name="white">#ffffff</color>
+
+    <color name="bright_gold">#E7B850</color>
+    <color name="brighter_gold">#f3dca8</color>
+    <color name="dark_gold">#d8ab4c</color>
+    <color name="dore_blue">#006682</color>
+    <color name="dore_red">#993d1b</color>
+    <color name="dark_gray">#333333</color>
+    <color name="light_gray">#dddddd</color>
 
     <style name="detail_name_text">
         <item name="android:textSize">24sp</item>

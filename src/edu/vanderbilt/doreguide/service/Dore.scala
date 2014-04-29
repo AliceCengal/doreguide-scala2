@@ -79,10 +79,13 @@ class Dore extends android.app.Application with HeartPersistence {
 
     handles foreach { _ ! Initialize(this) }
 
-    handles(this.PLACE_SERVER_INDEX).
-        request(
-          PlaceServer.GetPlacesIdRange(loadHearted()))(
-          HandlerActor.sync(new PlaceReceiver))
+    val heartedIds = loadHearted()
+    if (!heartedIds.isEmpty) {
+      handles(this.PLACE_SERVER_INDEX).
+      request(
+            PlaceServer.GetPlacesIdRange(heartedIds))(
+            HandlerActor.sync(new PlaceReceiver))
+    }
   }
 
   class PlaceReceiver extends Handler.Callback {
@@ -104,7 +107,7 @@ private[service] object Dore {
 
   private[service] case class Initialize(ctx: Context)
 
-  private trait HeartPersistence {
+  trait HeartPersistence {
     self: android.app.Application =>
 
     val HEARTED = "hearted"
@@ -124,6 +127,7 @@ private[service] object Dore {
           getString(HEARTED,
                     "").
           split(",").
+          filter(s => !s.isEmpty).
           map(numString => Integer.parseInt(numString)).
           toList
     }
