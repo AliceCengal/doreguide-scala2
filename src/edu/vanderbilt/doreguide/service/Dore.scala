@@ -3,16 +3,17 @@ package edu.vanderbilt.doreguide.service
 import scala.collection.mutable
 
 import android.content.Context
-import android.os.HandlerThread
+import android.os.{Message, Handler, HandlerThread}
 
 import edu.vanderbilt.doreguide.model.Place
+import edu.vanderbilt.doreguide.service.Dore.HeartPersistence
 
 /**
  * The starting point of the app process. Initiates the services.
  *
  * Created by athran on 4/15/14.
  */
-class Dore extends android.app.Application {
+class Dore extends android.app.Application with HeartPersistence {
 
   import Dore.Initialize
 
@@ -42,17 +43,23 @@ class Dore extends android.app.Application {
 
   def heart(plc: Place): Unit = {
     heartedSet.add(plc)
+    saveHearted(heartedSet.
+                map(p => p.uniqueId).
+                toList)
   }
 
   def unheart(plc: Place): Unit = {
     heartedSet.remove(plc)
+    saveHearted(heartedSet.
+                map(p => p.uniqueId).
+                toList)
   }
 
   def isHearted(plc: Place): Boolean = {
     heartedSet.contains(plc)
   }
 
-  def getAllHearted: List[Place] = heartedSet.toList
+  def getAllHearted: Seq[Place] = heartedSet.toList
 
   private def initializeGlobalState() {
     val thread = new HandlerThread("workerthread")
@@ -72,12 +79,55 @@ class Dore extends android.app.Application {
 
     handles foreach { _ ! Initialize(this) }
 
+    handles(this.PLACE_SERVER_INDEX).
+        request(
+          PlaceServer.GetPlacesIdRange(loadHearted()))(
+          HandlerActor.sync(new PlaceReceiver))
+  }
+
+  class PlaceReceiver extends Handler.Callback {
+    def handleMessage(msg: Message): Boolean = {
+      msg.obj match {
+        case PlaceServer.PlaceResult(plcs) =>
+          heartedSet ++= plcs
+        case _ =>
+      }
+      true
+    }
   }
 
 }
 
 private[service] object Dore {
 
+  val PREFS = "doreguide"
+
   private[service] case class Initialize(ctx: Context)
+
+  private trait HeartPersistence {
+    self: android.app.Application =>
+
+    val HEARTED = "hearted"
+
+    def getPrefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+
+    def saveHearted(hearteds: List[Int]) {
+      getPrefs.
+          edit().
+          putString(HEARTED,
+                    hearteds.mkString(",")).
+          commit()
+    }
+
+    def loadHearted(): List[Int] = {
+      getPrefs.
+          getString(HEARTED,
+                    "").
+          split(",").
+          map(numString => Integer.parseInt(numString)).
+          toList
+    }
+
+  }
 
 }

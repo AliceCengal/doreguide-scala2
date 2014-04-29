@@ -37,7 +37,7 @@ private[service] class EventBus extends Handler.Callback {
 
   import EventBus._
 
-  private val subscribers: mutable.Set[WeakReference[HandlerActor]] = mutable.Set.empty
+  private val subscribers = mutable.Set.empty[WeakReference[HandlerActor]]
 
   def handleMessage(incoming: Message): Boolean = {
     incoming.obj match {

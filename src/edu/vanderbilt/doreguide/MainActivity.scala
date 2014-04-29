@@ -63,13 +63,17 @@ class MainActivity extends Activity
         replace(R.id.main_main,
                 PlacesMapFragment.showHearted).
         commit()
+
       case PlaceDetailFrag.MapButtonClicked(plc) =>
+
+
       case PlaceDetailFrag.NearbyPlaceSelected(plc) =>
         getFragmentManager.
         beginTransaction().
         replace(R.id.main_main,
                 PlaceDetailFrag.showThisPlace(plc)).
         commit()
+
       case _ =>
     }
     true

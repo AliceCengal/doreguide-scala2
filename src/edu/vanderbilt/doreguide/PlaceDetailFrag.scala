@@ -10,7 +10,7 @@ import android.view.View.OnClickListener
 
 import edu.vanderbilt.doreguide.model.Place
 import edu.vanderbilt.doreguide.view.{SimpleInjections, FragmentViewUtil}
-import edu.vanderbilt.doreguide.service.{HandlerActor, PlaceServer, Geomancer}
+import edu.vanderbilt.doreguide.service.{PlaceServer, Geomancer}
 
 /**
  * The page that displays the details of a Place
@@ -21,18 +21,15 @@ class PlaceDetailFrag extends Fragment
                               with SimpleInjections.FragmentInjection
                               with Handler.Callback
                               with FragmentViewUtil
-                              with View.OnClickListener
-                              with HandlerActor.ImplicitRequester {
+                              with View.OnClickListener {
 
   self: PlaceDetailFrag.DetailBehaviour =>
 
   import PlaceDetailFrag._
   import service._
 
-  lazy val controller = HandlerActor.sync(this)
+  implicit lazy val controller = HandlerActor.sync(this)
   var place: Place = null
-
-  implicit val requester = controller
 
   def tvTitle       = component[TextView](R.id.tv_title)
   def ivMainImage   = component[ImageView](R.id.iv1)
