@@ -4,6 +4,8 @@ import com.google.gson.{JsonParser, JsonObject}
 import java.io.Reader
 
 /**
+ * Represents a place on campus
+ *
  * Created by athran on 4/15/14.
  */
 case class Place(uniqueId:    Int,
@@ -36,24 +38,24 @@ object Place {
 
   def fromJsonObject(obj: JsonObject): Place = {
     Place(
-      obj.get(TAG_ID).getAsInt,
-      obj.get(TAG_NAME).getAsString,
-      obj.get(TAG_DESC).getAsString,
-      obj.get(TAG_LAT).getAsDouble,
-      obj.get(TAG_LON).getAsDouble,
-      obj.get(TAG_IMAGEIDS).getAsJsonArray
-          .iterator()
-          .asScala
-          .map(_.getAsInt)
-          .toList,
-      obj.get(TAG_HOURS).getAsString,
-      obj.get(TAG_CAT).getAsJsonArray
-          .iterator()
-          .asScala
-          .map(_.getAsString)
-          .map(PlaceCategory.fromName)
-          .toList
-    )
+           uniqueId    = obj.get(TAG_ID).getAsInt,
+           name        = obj.get(TAG_NAME).getAsString,
+           description = obj.get(TAG_DESC).getAsString,
+           latitude    = obj.get(TAG_LAT).getAsDouble,
+           longitude   = obj.get(TAG_LON).getAsDouble,
+           images      = obj.get(TAG_IMAGEIDS).getAsJsonArray
+                             .iterator()
+                             .asScala
+                             .map(_.getAsInt)
+                             .toList,
+           hours       = obj.get(TAG_HOURS).getAsString,
+           categories  = obj.get(TAG_CAT).getAsJsonArray
+                             .iterator()
+                             .asScala
+                             .map(_.getAsString)
+                             .map(PlaceCategory.fromName)
+                             .toList
+         )
   }
 
   def fromReader(reader: Reader): Place = {

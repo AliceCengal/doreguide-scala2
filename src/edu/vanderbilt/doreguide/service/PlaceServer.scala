@@ -1,13 +1,14 @@
 package edu.vanderbilt.doreguide.service
 
 import java.net.URL
-import java.io.InputStreamReader
+import java.io.{FileOutputStream, OutputStreamWriter, Reader, StringWriter, FileInputStream, File, InputStreamReader}
 
 import android.content.Context
 
 import com.google.gson.JsonParser
 
 import edu.vanderbilt.doreguide.model.Place
+import scala.io.{Codec, Source}
 
 /**
  * Fetches and caches place data
@@ -61,6 +62,8 @@ object PlaceServer {
 
   val rawDataUrl = "https://raw.github.com/AliceCengal/vanderbilt-data/master/places.json"
 
+  val cachePath = "/places.json"
+
 }
 
 private[service] class PlaceServer extends HandlerActor.Server {
@@ -83,19 +86,59 @@ private[service] class PlaceServer extends HandlerActor.Server {
   }
 
   def init(ctx: Context): Unit = {
-    this.placeBank =
-      new JsonParser()
-          .parse(
-            new InputStreamReader(
-              new URL(rawDataUrl)
-                  .openConnection()
-                  .getInputStream))
-          .getAsJsonArray
-          .iterator().asScala
-          .map(_.getAsJsonObject)
-          .map(obj => Place.fromJsonObject(obj))
-          .map(plc => (plc.uniqueId, plc))
-          .toMap
+    val cacheFile = new File(ctx.getExternalFilesDir(null),
+                             cachePath)
+
+    if (cacheFile.exists() && cacheFile.isFile && cacheFile.canRead) {
+      val plcList = readFromStream(new InputStreamReader(new FileInputStream(cacheFile)))
+
+      if (!plcList.isEmpty) {
+        placeBank =
+            plcList.
+                map(p => p.uniqueId -> p).
+                toMap
+      } else {
+        loadFromServer(ctx)
+      }
+
+    } else {
+      loadFromServer(ctx)
+    }
+
+  }
+
+  private def readFromStream(reader: Reader): Seq[Place] = {
+    try {
+      new JsonParser().
+          parse(reader).
+          getAsJsonArray.
+          iterator().asScala.
+          map(_.getAsJsonObject).
+          map(obj => Place.fromJsonObject(obj)).
+          toList
+    } catch {
+      case e: Exception => List.empty[Place]
+    }
+  }
+
+  private def loadFromServer(ctx: Context) {
+    val serverJson = Source.fromURL(rawDataUrl, Codec.UTF8.name)
+    val cache = new OutputStreamWriter(
+                    new FileOutputStream(
+                        new File(ctx.getExternalFilesDir(null),
+                                 cachePath)))
+    for (l <- serverJson.getLines()) { cache.write(l) }
+    serverJson.close()
+    cache.flush()
+    cache.close()
+
+    val plcs = readFromStream(Source.fromFile(new File(ctx.getExternalFilesDir(null),
+                                                       cachePath),
+                                              Codec.UTF8.name).
+                                  reader())
+    placeBank = plcs.
+                    map(p => p.uniqueId -> p).
+                    toMap
   }
 
   private def sendPlaceWithId(id: Int) {

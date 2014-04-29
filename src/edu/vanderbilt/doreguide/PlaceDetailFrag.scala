@@ -4,7 +4,7 @@ import android.view.{View, LayoutInflater}
 import android.os.{Message, Handler}
 import android.app.Fragment
 import android.location.Location
-import android.widget.{Toast, ImageButton, ScrollView, LinearLayout, EditText, Button, ImageView, TextView}
+import android.widget.{CheckBox, Toast, ImageButton, ScrollView, LinearLayout, EditText, Button, ImageView, TextView}
 import android.graphics.Bitmap
 import android.view.View.OnClickListener
 
@@ -38,6 +38,7 @@ class PlaceDetailFrag extends Fragment
 
   def btnMap        = component[ImageButton](R.id.btn_map)
   def btnHeart      = component[ImageButton](R.id.btn_heart)
+  def cbHeart       = component[CheckBox](R.id.cb_heart)
 
   def btnSubmit     = component[Button](R.id.btn_submit)
   def etEmail       = component[EditText](R.id.et_email)
@@ -107,9 +108,12 @@ class PlaceDetailFrag extends Fragment
     tvDescription.setVisibility(View.VISIBLE)
 
     if (dore.isHearted(plc)) {
-      btnHeart.setImageResource(R.drawable.rating_not_important)
+      //btnHeart.setImageResource(R.drawable.rating_not_important)
+      cbHeart.setChecked(true)
+
     } else {
-      btnHeart.setImageResource(R.drawable.rating_important)
+      //btnHeart.setImageResource(R.drawable.rating_important)
+      cbHeart.setChecked(false)
     }
 
     if (!plc.images.isEmpty) {
@@ -173,10 +177,13 @@ class PlaceDetailFrag extends Fragment
   private def doHeartToggle() {
     if (dore.isHearted(place)) {
       dore.unheart(place)
-      btnHeart.setImageResource(R.drawable.rating_important)
+      //btnHeart.setImageResource(R.drawable.rating_important)
+      cbHeart.setChecked(false)
+
     } else {
       dore.heart(place)
-      btnHeart.setImageResource(R.drawable.rating_not_important)
+      //btnHeart.setImageResource(R.drawable.rating_not_important)
+      cbHeart.setChecked(true)
     }
   }
 
