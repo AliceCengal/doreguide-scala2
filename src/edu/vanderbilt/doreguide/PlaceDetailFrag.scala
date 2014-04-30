@@ -88,10 +88,10 @@ class PlaceDetailFrag extends Fragment
   private def handlePlaces(plcs: List[Place]) {
     if (plcs.size == 1) {
       val plc = plcs(0)
-      dore.placeServer !
-      (controller, PlaceServer.FindNClosest(plc.latitude,
-                                            plc.longitude,
-                                            NEARBY_COUNT + 1))
+      dore.placeServer request
+          PlaceServer.FindNClosest(plc.latitude,
+                                   plc.longitude,
+                                   NEARBY_COUNT + 1)
     } else {
       displayPlace(plcs(0))
       displayNearbyPlaces(plcs.tail)
@@ -108,16 +108,13 @@ class PlaceDetailFrag extends Fragment
     tvDescription.setVisibility(View.VISIBLE)
 
     if (dore.isHearted(plc)) {
-      //btnHeart.setImageResource(R.drawable.rating_not_important)
       cbHeart.setChecked(true)
-
     } else {
-      //btnHeart.setImageResource(R.drawable.rating_important)
       cbHeart.setChecked(false)
     }
 
     if (!plc.images.isEmpty) {
-      dore.imageServer ! (controller, ImageServer.DispatchImageFromId(plc.images(0)))
+      dore.imageServer request ImageServer.DispatchImageFromId(plc.images(0))
     }
   }
 
@@ -177,12 +174,10 @@ class PlaceDetailFrag extends Fragment
   private def doHeartToggle() {
     if (dore.isHearted(place)) {
       dore.unheart(place)
-      //btnHeart.setImageResource(R.drawable.rating_important)
       cbHeart.setChecked(false)
 
     } else {
       dore.heart(place)
-      //btnHeart.setImageResource(R.drawable.rating_not_important)
       cbHeart.setChecked(true)
     }
   }
@@ -227,7 +222,7 @@ object PlaceDetailFrag {
     self: PlaceDetailFrag =>
 
     def init() {
-      dore.geomancer ! (controller, Geomancer.GetLocation)
+      dore.geomancer request Geomancer.GetLocation
     }
 
   }
@@ -238,7 +233,7 @@ object PlaceDetailFrag {
     def placeId: Int
 
     def init() {
-      dore.placeServer ! (controller, PlaceServer.GetPlaceWithId(placeId))
+      dore.placeServer request PlaceServer.GetPlaceWithId(placeId)
     }
   }
 

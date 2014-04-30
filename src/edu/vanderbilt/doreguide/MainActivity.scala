@@ -17,17 +17,17 @@ class MainActivity extends Activity
 	override def onCreate(saved: Bundle) {
 		super.onCreate(saved)
 		setContentView(R.layout.activity_main)
-    getFragmentManager.
-        beginTransaction().
-        add(R.id.main_main,
-            PlaceDetailFrag.showNearestPlace,
-            "PlaceDetailFrag").
-        commit()
 	}
 
   override def onStart() {
     super.onStart()
     dore.eventbus ! EventBus.Subscribe(communicator)
+    getFragmentManager.
+        beginTransaction().
+        replace(R.id.main_main,
+              PlaceDetailFrag.showNearestPlace,
+              "PlaceDetailFrag").
+        commit()
   }
 
   override def onStop() {
