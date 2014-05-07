@@ -1,14 +1,13 @@
 package edu.vanderbilt.doreguide.service
 
-import java.net.URL
-import java.io.{FileOutputStream, OutputStreamWriter, Reader, StringWriter, FileInputStream, File, InputStreamReader}
+import java.io.{FileOutputStream, OutputStreamWriter, Reader, FileInputStream, File, InputStreamReader}
+import scala.io.{Codec, Source}
 
 import android.content.Context
 
 import com.google.gson.JsonParser
 
 import edu.vanderbilt.doreguide.model.Place
-import scala.io.{Codec, Source}
 
 /**
  * Fetches and caches place data

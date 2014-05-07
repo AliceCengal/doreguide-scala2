@@ -1,8 +1,8 @@
 package edu.vanderbilt.doreguide.service
 
-import android.os.{Message, Handler}
 import scala.collection.mutable
 import scala.ref.WeakReference
+import android.os.{Message, Handler}
 
 /**
  * The global event bus that allows components to communicate

@@ -19,8 +19,8 @@ class HeartFrag extends Fragment
                         with FragmentViewUtil
                         with Handler.Callback
                         with AdapterView.OnItemClickListener
-                        with View.OnClickListener {
-
+                        with View.OnClickListener
+{
   import service._
 
   def layoutId = R.layout.heart_list

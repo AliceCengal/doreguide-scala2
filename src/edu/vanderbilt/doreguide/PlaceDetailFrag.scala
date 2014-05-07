@@ -4,7 +4,7 @@ import android.view.{View, LayoutInflater}
 import android.os.{Message, Handler}
 import android.app.Fragment
 import android.location.Location
-import android.widget.{CheckBox, Toast, ImageButton, ScrollView, LinearLayout, EditText, Button, ImageView, TextView}
+import android.widget.{ProgressBar, CheckBox, Toast, ImageButton, ScrollView, LinearLayout, EditText, Button, ImageView, TextView}
 import android.graphics.Bitmap
 import android.view.View.OnClickListener
 
@@ -21,8 +21,8 @@ class PlaceDetailFrag extends Fragment
                               with SimpleInjections.FragmentInjection
                               with Handler.Callback
                               with FragmentViewUtil
-                              with View.OnClickListener {
-
+                              with View.OnClickListener
+{
   self: PlaceDetailFrag.DetailBehaviour =>
 
   import PlaceDetailFrag._
@@ -56,7 +56,6 @@ class PlaceDetailFrag extends Fragment
 
     dore.eventbus ! EventBus.Subscribe(controller)
     init()
-
   }
 
   override def onStop() {
@@ -75,7 +74,6 @@ class PlaceDetailFrag extends Fragment
   }
 
   private def handleLoc(maybeLoc: Option[Location]) {
-
     import PlaceServer.FindNClosest
 
     for (loc <- maybeLoc) {
@@ -103,9 +101,7 @@ class PlaceDetailFrag extends Fragment
     this.place = plc
 
     tvTitle.setText(plc.name)
-    tvTitle.setVisibility(View.VISIBLE)
     tvDescription.setText(plc.description)
-    tvDescription.setVisibility(View.VISIBLE)
 
     if (dore.isHearted(plc)) {
       cbHeart.setChecked(true)
@@ -136,11 +132,6 @@ class PlaceDetailFrag extends Fragment
 
   private def setMainImage(img: Bitmap) {
     ivMainImage.setImageBitmap(img)
-    controller.postDelayed(new Runnable(){
-      def run(): Unit = {
-        ivMainImage.setVisibility(View.VISIBLE)
-      }
-    }, 1000)
   }
 
   def onClick(v: View): Unit = {
