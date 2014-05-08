@@ -41,23 +41,18 @@ object PlaceServer {
   /**
    * Find the Place closest to the given coordinate
    *
-   * Reply: ClosestPlace
+   * Reply: PlaceResult
    */
   case class FindClosestPlace(lat: Double, lng: Double)
 
   /**
    * Find n number of closest Places
    *
-   * Reply: List[ClosestPlace]
+   * Reply: PlaceResult
    */
   case class FindNClosest(lat: Double, lng: Double, n: Int)
 
   case class PlaceResult(plcs: List[Place])
-
-  /**
-   * Container for the closest request
-   */
-  case class ClosestPlace(plc: Place)
 
   val rawDataUrl = "https://raw.github.com/AliceCengal/vanderbilt-data/master/places.json"
 

@@ -79,7 +79,10 @@ class MainActivity extends Activity
         getFragmentManager.
             beginTransaction().
             addToBackStack(null).
-            replace(R.id.main_main, null).
+            replace(R.id.main_main,
+                    PlacesMapFragment.showAll).
+            replace(R.id.main_underbar,
+                    new MapUnderbarFrag).
             commit()
 
       case PlaceDetailFrag.NearbyPlaceSelected(plc) =>

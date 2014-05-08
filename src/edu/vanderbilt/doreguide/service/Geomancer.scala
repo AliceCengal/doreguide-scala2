@@ -70,7 +70,7 @@ object Geomancer {
   /**
    * Request current location
    *
-   * Reply: Option[Location]
+   * Reply: LocationResult
    */
   case object GetLocation
 
