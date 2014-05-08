@@ -168,6 +168,7 @@ object PlacesMapFragment {
 
           if (!isCurrentStillInView) {
             currentHighlighted = null
+            dore.eventbus ! MapUnderbarFrag.Clear
           }
 
         case _ =>
@@ -194,7 +195,7 @@ object PlacesMapFragment {
         getMap.clear()
       } catch {
         case bogus: IllegalArgumentException => /* Do nothing */
-        case e => throw e
+        case e: Throwable => throw e
       }
       dore.placeServer request PlaceServer.FindNClosest(position.target.latitude,
                                                          position.target.longitude,
@@ -238,6 +239,8 @@ class MapUnderbarFrag extends Fragment
         display(plc)
       case Display(plc) =>
         display(plc)
+      case Clear =>
+        box.setText("Vanderbilt University")
       case _ =>
     }
     true
@@ -253,4 +256,5 @@ class MapUnderbarFrag extends Fragment
 object MapUnderbarFrag {
   case class MapUnderbarClicked(plc: Place)
   case class Display(plc: Place)
+  case object Clear
 }

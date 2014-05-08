@@ -100,6 +100,15 @@ class MainActivity extends Activity
                     PlaceDetailFrag.showThisPlace(plc)).
             commit()
 
+      case MapUnderbarFrag.MapUnderbarClicked(plc) =>
+        getFragmentManager.
+            beginTransaction().
+            addToBackStack(null).
+            replace(R.id.main_main,
+                    PlaceDetailFrag.showThisPlace(plc)).
+            remove(getFragmentManager.findFragmentById(R.id.main_underbar)).
+            commit()
+
       case _ =>
     }
     true
