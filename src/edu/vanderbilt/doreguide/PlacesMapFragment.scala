@@ -1,18 +1,21 @@
 package edu.vanderbilt.doreguide
 
+import scala.collection.mutable
+
 import android.app.Fragment
 import android.os.{Message, Handler}
 import android.widget.TextView
 import android.view.View
 import android.view.View.OnClickListener
 
-import edu.vanderbilt.doreguide.model.Place
-import service._
-import edu.vanderbilt.doreguide.view.{SimpleInjections, FragmentViewUtil}
+import com.google.android.gms.maps.model.{BitmapDescriptorFactory, Marker, LatLng, MarkerOptions}
+import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.{CameraUpdateFactory, MapFragment}
-import edu.vanderbilt.doreguide.PlacesMapFragment.MapBehaviour
-import com.google.android.gms.maps.model.{Marker, LatLng, MarkerOptions}
-import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
+
+import edu.vanderbilt.doreguide.model.Place
+import edu.vanderbilt.doreguide.view.{SimpleInjections, FragmentViewUtil}
+import edu.vanderbilt.doreguide.PlacesMapFragment._
+import service._
 
 /**
  * The map with its underbar
@@ -24,6 +27,8 @@ class PlacesMapFragment extends MapFragment
                                 with Handler.Callback {
 
   self: MapBehaviour =>
+
+  val markers = mutable.Set.empty[(Place, Marker)]
 
   def handleMessage(msg: Message): Boolean = {
     handleSpecial(msg.obj)
@@ -39,7 +44,10 @@ class PlacesMapFragment extends MapFragment
 
 object PlacesMapFragment {
 
-  case class MarkerClicked(lat: Double, lng: Double)
+  lazy val normalIcon = BitmapDescriptorFactory.defaultMarker()
+  lazy val highlighted = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)
+
+  case class MarkerClicked(plc: Place)
 
   def showHearted = {
     new PlacesMapFragment with ShowHearted
@@ -50,11 +58,10 @@ object PlacesMapFragment {
     def handleSpecial(msg: AnyRef) {}
   }
 
-  trait ShowHearted extends MapBehaviour{
+  trait ShowHearted extends MapBehaviour with GoogleMap.OnMarkerClickListener {
     self: PlacesMapFragment =>
 
     def init() {
-
       val googleMap = getMap
 
       googleMap.moveCamera(CameraUpdateFactory.
@@ -62,23 +69,30 @@ object PlacesMapFragment {
                                                     Geomancer.DEFAULT_LONGITUDE),
                                          Geomancer.DEFAULT_ZOOM))
       for (plc <- dore.getAllHearted) {
-        googleMap.addMarker(new MarkerOptions().
-                            draggable(false).
-                            position(new LatLng(plc.latitude,
-                                                plc.longitude)).
-                            title(plc.name))
+        val option = new MarkerOptions().
+                    draggable(false).
+                    position(new LatLng(plc.latitude,
+                                         plc.longitude)).
+                    title(plc.name)
+        val marker = googleMap.addMarker(option)
+        marker.setSnippet(plc.name)
+        markers.add((plc, marker)) // terrible API
       }
 
-      googleMap.setOnMarkerClickListener(new OnMarkerClickListener {
-        def onMarkerClick(marker: Marker): Boolean = {
-          dore.eventbus ! MarkerClicked(marker.getPosition.latitude,
-                                        marker.getPosition.longitude)
-          googleMap.animateCamera(CameraUpdateFactory.
-                                  newLatLng(marker.getPosition))
-          true
-        }
-      })
+      googleMap.setOnMarkerClickListener(this)
+    }
 
+    def onMarkerClick(marker: Marker): Boolean = {
+      for (placeClicked <- markers.find(pair => pair._1.name.equals(marker.getSnippet))) {
+        dore.eventbus ! MarkerClicked(placeClicked._1)
+      }
+
+      getMap.animateCamera(CameraUpdateFactory.
+                              newLatLng(marker.getPosition))
+
+      markers.foreach(pair => pair._2.setIcon(normalIcon))
+      marker.setIcon(highlighted)
+      true
     }
 
   }
@@ -116,13 +130,20 @@ class MapUnderbarFrag extends Fragment
 
   def handleMessage(msg: Message): Boolean = {
     msg.obj match {
+      case PlacesMapFragment.MarkerClicked(plc) =>
+        display(plc)
       case Display(plc) =>
-        place = plc
-        box.setText(plc.name)
+        display(plc)
       case _ =>
     }
     true
   }
+
+  def display(plc: Place) {
+    place = plc
+    box.setText(plc.name)
+  }
+
 }
 
 object MapUnderbarFrag {

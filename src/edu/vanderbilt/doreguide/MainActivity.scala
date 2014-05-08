@@ -71,6 +71,8 @@ class MainActivity extends Activity
             addToBackStack(null).
             replace(R.id.main_main,
                     PlacesMapFragment.showHearted).
+            replace(R.id.main_underbar,
+                    new MapUnderbarFrag).
             commit()
 
       case PlaceDetailFrag.MapButtonClicked(plc) =>
@@ -83,6 +85,14 @@ class MainActivity extends Activity
       case PlaceDetailFrag.NearbyPlaceSelected(plc) =>
         getFragmentManager.
             beginTransaction().
+            replace(R.id.main_main,
+                    PlaceDetailFrag.showThisPlace(plc)).
+            commit()
+
+      case HeartFrag.ListItemClicked(plc) =>
+        getFragmentManager.
+            beginTransaction().
+            addToBackStack(null).
             replace(R.id.main_main,
                     PlaceDetailFrag.showThisPlace(plc)).
             commit()

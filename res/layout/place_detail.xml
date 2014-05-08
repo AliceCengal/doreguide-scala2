@@ -25,7 +25,7 @@
 
             <ImageView
                     android:scaleType="centerCrop"
-                    android:src="@color/light_gray"
+                    android:src="@color/brighter_gold"
                     android:id="@+id/iv1"
                     android:layout_width="0dp"
                     android:layout_weight="1"
