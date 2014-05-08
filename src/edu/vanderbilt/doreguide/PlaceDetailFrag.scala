@@ -4,7 +4,7 @@ import android.view.{View, LayoutInflater}
 import android.os.{Message, Handler}
 import android.app.Fragment
 import android.location.Location
-import android.widget.{ProgressBar, CheckBox, Toast, ImageButton, ScrollView, LinearLayout, EditText, Button, ImageView, TextView}
+import android.widget.{CheckBox, Toast, ImageButton, ScrollView, LinearLayout, EditText, Button, ImageView, TextView}
 import android.graphics.Bitmap
 import android.view.View.OnClickListener
 

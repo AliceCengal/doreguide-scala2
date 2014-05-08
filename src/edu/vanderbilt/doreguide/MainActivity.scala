@@ -1,7 +1,7 @@
 package edu.vanderbilt.doreguide
 
 import android.os.{Message, Handler, Bundle}
-import android.app.{Fragment, Activity}
+import android.app.{FragmentManager, Fragment, Activity}
 import android.view.{MenuItem, Menu}
 
 import edu.vanderbilt.doreguide.service.{HandlerActor, EventBus}
@@ -14,10 +14,11 @@ class MainActivity extends Activity
   lazy val communicator = HandlerActor.sync(this)
   var currentFragment: Fragment = null
 
-	override def onCreate(saved: Bundle) {
-		super.onCreate(saved)
-		setContentView(R.layout.activity_main)
-	}
+  override def onCreate(saved: Bundle) {
+    super.onCreate(saved)
+    setContentView(R.layout.activity_main)
+    getActionBar.setDisplayHomeAsUpEnabled(true)
+  }
 
   override def onStart() {
     super.onStart()
@@ -41,38 +42,50 @@ class MainActivity extends Activity
   }
 
   override def onOptionsItemSelected(item: MenuItem): Boolean = {
-    if (item.getItemId == R.id.action_settings) {
-      true
-    } else if (item.getItemId == R.id.action_hearted) {
-      getFragmentManager.
-          beginTransaction().
-          replace(R.id.main_main, new HeartFrag, "HeartFrag").
-          commit()
-      true
-    } else {
-      super.onOptionsItemSelected(item)
+    item.getItemId match {
+      case R.id.action_settings =>
+        true
+
+      case R.id.action_hearted =>
+        getFragmentManager.
+            beginTransaction().
+            addToBackStack(null).
+            replace(R.id.main_main, new HeartFrag, "HeartFrag").
+            commit()
+        true
+
+      case android.R.id.home =>
+          getFragmentManager.popBackStack(null,
+                                           FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        true
+
+      case _ => super.onOptionsItemSelected(item)
     }
   }
 
-  def handleMessage(msg: Message): Boolean = {
+  override def handleMessage(msg: Message): Boolean = {
     msg.obj match {
       case HeartFrag.MapButtonClicked =>
         getFragmentManager.
-        beginTransaction().
-        addToBackStack(null).
-        replace(R.id.main_main,
-                PlacesMapFragment.showHearted).
-        commit()
+            beginTransaction().
+            addToBackStack(null).
+            replace(R.id.main_main,
+                    PlacesMapFragment.showHearted).
+            commit()
 
       case PlaceDetailFrag.MapButtonClicked(plc) =>
-
+        getFragmentManager.
+            beginTransaction().
+            addToBackStack(null).
+            replace(R.id.main_main, null).
+            commit()
 
       case PlaceDetailFrag.NearbyPlaceSelected(plc) =>
         getFragmentManager.
-        beginTransaction().
-        replace(R.id.main_main,
-                PlaceDetailFrag.showThisPlace(plc)).
-        commit()
+            beginTransaction().
+            replace(R.id.main_main,
+                    PlaceDetailFrag.showThisPlace(plc)).
+            commit()
 
       case _ =>
     }
