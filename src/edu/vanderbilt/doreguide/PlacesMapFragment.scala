@@ -24,8 +24,8 @@ import service._
  */
 class PlacesMapFragment extends MapFragment
                                 with SimpleInjections.FragmentInjection
-                                with Handler.Callback {
-
+                                with Handler.Callback
+{
   self: MapBehaviour =>
 
   val markers = mutable.Set.empty[(Place, Marker)]
@@ -61,7 +61,7 @@ object PlacesMapFragment {
   trait ShowHearted extends MapBehaviour with GoogleMap.OnMarkerClickListener {
     self: PlacesMapFragment =>
 
-    def init() {
+    override def init() {
       val googleMap = getMap
 
       googleMap.moveCamera(CameraUpdateFactory.
@@ -82,7 +82,7 @@ object PlacesMapFragment {
       googleMap.setOnMarkerClickListener(this)
     }
 
-    def onMarkerClick(marker: Marker): Boolean = {
+    override def onMarkerClick(marker: Marker): Boolean = {
       for (placeClicked <- markers.find(pair => pair._1.name.equals(marker.getSnippet))) {
         dore.eventbus ! MarkerClicked(placeClicked._1)
       }
@@ -97,6 +97,14 @@ object PlacesMapFragment {
 
   }
 
+  trait ShowAll extends MapBehaviour with GoogleMap.OnMapClickListener {
+    self: PlacesMapFragment =>
+
+    override def init() {
+
+    }
+  }
+
 }
 
 class MapUnderbarFrag extends Fragment
@@ -106,7 +114,7 @@ class MapUnderbarFrag extends Fragment
 
   import MapUnderbarFrag._
 
-  def layoutId: Int = R.layout.simple_text
+  def layoutId: Int = R.layout.underbar_text
 
   lazy val controller = HandlerActor.sync(this)
   var place: Place = null

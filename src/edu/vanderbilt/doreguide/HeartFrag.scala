@@ -5,7 +5,7 @@ import android.os.{Message, Handler}
 import android.widget.{ImageButton, AdapterView, ListView}
 import android.view.View
 
-import edu.vanderbilt.doreguide.view.{SimpleInjections, FragmentViewUtil, ArrayAdapterBuilder}
+import edu.vanderbilt.doreguide.view.{ChattyFrag, SimpleInjections, FragmentViewUtil, ArrayAdapterBuilder}
 import ArrayAdapterBuilder.ToString
 import edu.vanderbilt.doreguide.model.Place
 
@@ -15,17 +15,14 @@ import edu.vanderbilt.doreguide.model.Place
  * Created by athran on 4/19/14.
  */
 class HeartFrag extends Fragment
+                        with ChattyFrag
                         with SimpleInjections.FragmentInjection
                         with FragmentViewUtil
                         with Handler.Callback
                         with AdapterView.OnItemClickListener
                         with View.OnClickListener
 {
-  import service._
-
   def layoutId = R.layout.heart_list
-
-  lazy val controller = HandlerActor.sync(this)
 
   def list   = component[ListView](R.id.lv_heart)
   def btnMap = component[ImageButton](R.id.btn_map)
@@ -50,13 +47,6 @@ class HeartFrag extends Fragment
 
     list.setOnItemClickListener(this)
     btnMap.setOnClickListener(this)
-
-    dore.eventbus ! EventBus.Subscribe(controller)
-  }
-
-  override def onStop() {
-    super.onStop()
-    dore.eventbus ! EventBus.Unsubscribe(controller)
   }
 
   def onItemClick(p1: AdapterView[_],

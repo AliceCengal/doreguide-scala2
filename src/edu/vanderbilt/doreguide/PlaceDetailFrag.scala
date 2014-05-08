@@ -9,7 +9,7 @@ import android.graphics.Bitmap
 import android.view.View.OnClickListener
 
 import edu.vanderbilt.doreguide.model.Place
-import edu.vanderbilt.doreguide.view.{SimpleInjections, FragmentViewUtil}
+import edu.vanderbilt.doreguide.view.{ChattyFrag, SimpleInjections, FragmentViewUtil}
 import edu.vanderbilt.doreguide.service.{PlaceServer, Geomancer}
 
 /**
@@ -18,6 +18,7 @@ import edu.vanderbilt.doreguide.service.{PlaceServer, Geomancer}
  * Created by athran on 4/17/14.
  */
 class PlaceDetailFrag extends Fragment
+                              with ChattyFrag
                               with SimpleInjections.FragmentInjection
                               with Handler.Callback
                               with FragmentViewUtil
@@ -28,7 +29,6 @@ class PlaceDetailFrag extends Fragment
   import PlaceDetailFrag._
   import service._
 
-  implicit lazy val controller = HandlerActor.sync(this)
   var place: Place = null
 
   def tvTitle       = component[TextView](R.id.tv_title)
@@ -54,13 +54,7 @@ class PlaceDetailFrag extends Fragment
     btnHeart.setOnClickListener(this)
     btnMap.setOnClickListener(this)
 
-    dore.eventbus ! EventBus.Subscribe(controller)
     init()
-  }
-
-  override def onStop() {
-    super.onStop()
-    dore.eventbus ! EventBus.Unsubscribe(controller)
   }
 
   def handleMessage(msg: Message): Boolean = {
