@@ -9,7 +9,7 @@ import android.graphics.Bitmap
 import android.view.View.OnClickListener
 
 import edu.vanderbilt.doreguide.model.Place
-import edu.vanderbilt.doreguide.view.{ChattyFrag, SimpleInjections, FragmentViewUtil}
+import edu.vanderbilt.doreguide.view.{ChattyFrag, SimpleInjections, EasyFragment}
 import edu.vanderbilt.doreguide.service.{PlaceServer, Geomancer}
 
 /**
@@ -21,7 +21,7 @@ class PlaceDetailFrag extends Fragment
                               with ChattyFrag
                               with SimpleInjections.FragmentInjection
                               with Handler.Callback
-                              with FragmentViewUtil
+                              with EasyFragment
                               with View.OnClickListener
 {
   self: PlaceDetailFrag.DetailBehaviour =>

@@ -1,7 +1,7 @@
 package edu.vanderbilt.doreguide
 
 import android.os.{Message, Handler, Bundle}
-import android.app.{FragmentTransaction, FragmentManager, Fragment, Activity}
+import android.app.{FragmentTransaction, Fragment, Activity}
 import android.view.{MenuItem, Menu}
 
 import edu.vanderbilt.doreguide.service.{HandlerActor, EventBus}
@@ -11,10 +11,9 @@ import edu.vanderbilt.doreguide.model.Place
 
 class MainActivity extends Activity
                            with SimpleInjections.ActivityInjection
-                           with Handler.Callback {
-
+                           with Handler.Callback
+{
   lazy val communicator = HandlerActor.sync(this)
-  //var currentFragment: Fragment = null
   implicit val implicitMain = this
   var mainState: MainState = null
 
@@ -27,16 +26,12 @@ class MainActivity extends Activity
   override def onStart() {
     super.onStart()
     dore.eventbus ! EventBus.Subscribe(communicator)
-    getFragmentManager.
-        beginTransaction().
-        replace(R.id.main_main,
-              PlaceDetailFrag.showNearestPlace,
-              "PlaceDetailFrag").
-        commit()
+    ViewingCurrentLocation.enter
   }
 
   override def onStop() {
     super.onStop()
+    mainState.leave
     dore.eventbus ! EventBus.Unsubscribe(communicator)
   }
 
@@ -48,26 +43,33 @@ class MainActivity extends Activity
   override def onOptionsItemSelected(item: MenuItem): Boolean = {
     item.getItemId match {
       case R.id.action_settings =>
+
         true
 
       case R.id.action_hearted =>
-        getFragmentManager.
-            beginTransaction().
-            addToBackStack(null).
-            replace(R.id.main_main, new HeartFrag, "HeartFrag").
-            commit()
+        mainState.leave
+        ViewingHearted.enter
         true
 
       case android.R.id.home =>
-          getFragmentManager.popBackStack(null,
-                                           FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        mainState.leave
+        ViewingCurrentLocation.enter
         true
 
       case _ => super.onOptionsItemSelected(item)
     }
   }
 
+  override def onBackPressed() {
+    mainState.handleEvent(BackButton)
+  }
+
   override def handleMessage(msg: Message): Boolean = {
+    mainState.handleEvent(msg.obj)
+    true
+  }
+
+  def handleMessageOld(msg: Message): Boolean = {
     msg.obj match {
       case HeartFrag.MapButtonClicked =>
         getFragmentManager.
@@ -172,6 +174,10 @@ object MainActivity {
         case PlaceDetailFrag.MapButtonClicked(plc) =>
           this.leave
           ViewingMap.enter
+        case PlaceDetailFrag.NearbyPlaceSelected(plc) =>
+          this.leave
+          ViewingPlaceFromCurrent.enter
+          ViewingPlaceFromCurrent.handleEvent(plc)
         case _ =>
       }
     }
@@ -330,7 +336,7 @@ object MainActivity {
       fragUnder = new MapUnderbarFrag
       main.transaction(_.
                        add(R.id.main_main, frag).
-                       add(R.id.main_underbar, frag))
+                       add(R.id.main_underbar, fragUnder))
     }
 
     def handleEvent(event: AnyRef)(implicit main: MainActivity): Unit = {

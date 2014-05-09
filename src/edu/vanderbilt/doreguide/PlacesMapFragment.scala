@@ -15,7 +15,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.{CameraUpdateFactory, MapFragment}
 
 import edu.vanderbilt.doreguide.model.Place
-import edu.vanderbilt.doreguide.view.{ChattyFrag, SimpleInjections, FragmentViewUtil}
+import edu.vanderbilt.doreguide.view.{ChattyFrag, SimpleInjections, EasyFragment}
 import edu.vanderbilt.doreguide.PlacesMapFragment._
 import edu.vanderbilt.doreguide.service.{PlaceServer, Geomancer}
 
@@ -215,22 +215,24 @@ object PlacesMapFragment {
 class MapUnderbarFrag extends Fragment
                               with ChattyFrag
                               with SimpleInjections.FragmentInjection
-                              with FragmentViewUtil
-                              with Handler.Callback {
-
+                              with EasyFragment
+                              with Handler.Callback
+{
   import MapUnderbarFrag._
 
   def layoutId: Int = R.layout.underbar_text
 
-  var place: Place = null
+  private var place: Option[Place] = None
 
-  def box = component[TextView](R.id.tv_title)
+  private def box = component[TextView](R.id.tv_title)
 
   override def onStart() {
     super.onStart()
     box.setOnClickListener(new OnClickListener {
       def onClick(p1: View): Unit = {
-        dore.eventbus ! MapUnderbarFrag.MapUnderbarClicked(place)
+        for (maybePlace <- place) {
+          dore.eventbus ! MapUnderbarFrag.MapUnderbarClicked(maybePlace)
+        }
       }
     })
   }
@@ -242,6 +244,7 @@ class MapUnderbarFrag extends Fragment
       case Display(plc) =>
         display(plc)
       case Clear =>
+        place = None
         box.setText(dore.getString(R.string.campus))
       case _ =>
     }
@@ -249,8 +252,8 @@ class MapUnderbarFrag extends Fragment
   }
 
   def display(plc: Place) {
-    place = plc
-    box.setText(plc.name)
+    place = Option(plc)
+    for (p <- place) {box.setText(p.name)}
   }
 
 }

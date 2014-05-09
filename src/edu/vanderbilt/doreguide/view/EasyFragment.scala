@@ -5,9 +5,13 @@ import android.view.{View, ViewGroup, LayoutInflater}
 import android.os.Bundle
 
 /**
+ * This mixin provides automatic view inflation. Just define the
+ * desired layoutId. Also provides the component method for easy
+ * access to view components.
+ *
  * Created by athran on 4/19/14.
  */
-trait FragmentViewUtil {
+trait EasyFragment {
   self: Fragment =>
 
   def layoutId: Int

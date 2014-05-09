@@ -5,7 +5,7 @@ import android.os.{Message, Handler}
 import android.widget.{ImageButton, AdapterView, ListView}
 import android.view.View
 
-import edu.vanderbilt.doreguide.view.{ChattyFrag, SimpleInjections, FragmentViewUtil, ArrayAdapterBuilder}
+import edu.vanderbilt.doreguide.view.{ChattyFrag, SimpleInjections, EasyFragment, ArrayAdapterBuilder}
 import ArrayAdapterBuilder.ToString
 import edu.vanderbilt.doreguide.model.Place
 
@@ -17,7 +17,7 @@ import edu.vanderbilt.doreguide.model.Place
 class HeartFrag extends Fragment
                         with ChattyFrag
                         with SimpleInjections.FragmentInjection
-                        with FragmentViewUtil
+                        with EasyFragment
                         with Handler.Callback
                         with AdapterView.OnItemClickListener
                         with View.OnClickListener
