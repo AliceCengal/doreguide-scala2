@@ -25,3 +25,15 @@ trait EasyFragment {
   def component[T](id: Int) = getView.findViewById(id).asInstanceOf[T]
 
 }
+
+trait EasyChainCall {
+
+  class ChainCall[T](obj: T) {
+    def seq(calls: (T => Unit)*) {
+      for (c <- calls) { c(obj) }
+    }
+  }
+
+  implicit def ChainAnyref[U](a: U): ChainCall[U] = new ChainCall[U](a)
+
+}

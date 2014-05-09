@@ -15,7 +15,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.{CameraUpdateFactory, MapFragment}
 
 import edu.vanderbilt.doreguide.model.Place
-import edu.vanderbilt.doreguide.view.{ChattyFrag, SimpleInjections, EasyFragment}
+import edu.vanderbilt.doreguide.view.{EasyChainCall, ChattyFrag, SimpleInjections, EasyFragment}
 import edu.vanderbilt.doreguide.PlacesMapFragment._
 import edu.vanderbilt.doreguide.service.{PlaceServer, Geomancer}
 
@@ -105,19 +105,24 @@ object PlacesMapFragment {
   trait ShowAll extends MapBehaviour
                         with GoogleMap.OnMarkerClickListener
                         with GoogleMap.OnCameraChangeListener
+                        with EasyChainCall
   {
     self: PlacesMapFragment =>
 
     private val MARKER_COUNt = 20
-    private val CLOSE_ZOOM   = 18
-    private var currentHighlighted: PlaceMarker = null
+    private val CLOSE_ZOOM   = 17f
+    private var allMarkers: Seq[PlaceMarker] = List.empty
 
     override def init() {
-      val googleMap = getMap
-      googleMap.getUiSettings.setZoomControlsEnabled(false)
-      googleMap.setMyLocationEnabled(true)
-      googleMap.moveCamera(defaultCameraUpdate)
-      googleMap.setOnMarkerClickListener(this)
+
+      // I have absolutely no justification why this should be done this
+      // way. It's just fun...
+      getMap seq (
+          _.getUiSettings.setZoomControlsEnabled(false),
+          _.setMyLocationEnabled(true),
+          _.moveCamera(defaultCameraUpdate),
+          _.setOnMarkerClickListener(this))
+
       dore.geomancer request Geomancer.GetLocation
     }
 
@@ -130,9 +135,11 @@ object PlacesMapFragment {
                   PlaceServer.FindNClosest(loc.getLatitude,
                                             loc.getLongitude,
                                             MARKER_COUNt)
-              getMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(loc.getLatitude,
-                                                                              loc.getLongitude),
-                                                                   CLOSE_ZOOM))
+              getMap.moveCamera(
+                  CameraUpdateFactory.newLatLngZoom(
+                      new LatLng(loc.getLatitude,
+                                  loc.getLongitude),
+                      CLOSE_ZOOM))
             case None =>
               dore.placeServer request
                   PlaceServer.FindNClosest(Geomancer.DEFAULT_LATITUDE,
@@ -142,37 +149,7 @@ object PlacesMapFragment {
           getMap.setOnCameraChangeListener(this)
 
         case PlaceServer.PlaceResult(plcs) =>
-          markers.empty
-          var isCurrentStillInView = false
-
-          for (plc <- plcs) {
-            if (currentHighlighted != null &&
-                plc.uniqueId == currentHighlighted.place.uniqueId) {
-              val option = new MarkerOptions().
-                           icon(highlighted).
-                           draggable(false).
-                           position(new LatLng(plc.latitude,
-                                                plc.longitude)).
-                           snippet(plc.name)
-              val pm = PlaceMarker(plc, getMap.addMarker(option))
-              currentHighlighted = pm
-              markers.add(currentHighlighted)
-              isCurrentStillInView = true
-
-            } else {
-              val option = new MarkerOptions().
-                           draggable(false).
-                           position(new LatLng(plc.latitude,
-                                                plc.longitude)).
-                           snippet(plc.name)
-              markers.add(PlaceMarker(plc, getMap.addMarker(option)))
-            }
-          }
-
-          if (!isCurrentStillInView) {
-            currentHighlighted = null
-            dore.eventbus ! MapUnderbarFrag.Clear
-          }
+          drawMarkerForPlaces(plcs)
 
         case _ =>
       }
@@ -181,58 +158,24 @@ object PlacesMapFragment {
 
 
     override def onMarkerClick(marker: Marker): Boolean = {
-      marker.setIcon(highlighted)
-
-      if ((currentHighlighted != null ) &&
-          (currentHighlighted.marker ne marker)) {
-        currentHighlighted.marker.setIcon(normalIcon)
-      }
       handleMatchingMarker(marker)
-      true
+      false
     }
 
     private def handleMatchingMarker(marker: Marker) {
-      findMatchingPlaceFor(marker) match {
-        case Some(pm) =>
-          dore.eventbus ! MarkerClicked(pm.place)
-          currentHighlighted = pm
-        case None =>
-          safeClear()
-          drawMarkerForPlaces(markers.map(_.place).toList)
+      for (PlaceMarker(p, m) <- findMatchingPlaceFor(marker)) {
+        dore.eventbus ! MarkerClicked(p)
       }
     }
 
     private def drawMarkerForPlaces(plcs: Seq[Place]) {
-      markers.empty
-      var isCurrentStillInView = false
-
-      for (plc <- plcs) {
-        if (currentHighlighted != null &&
-            plc.uniqueId == currentHighlighted.place.uniqueId) {
-          val option = new MarkerOptions().
-                       icon(highlighted).
-                       draggable(false).
-                       position(new LatLng(plc.latitude,
-                                            plc.longitude)).
-                       snippet(plc.name)
-          val pm = PlaceMarker(plc, getMap.addMarker(option))
-          currentHighlighted = pm
-          markers.add(currentHighlighted)
-          isCurrentStillInView = true
-
-        } else {
-          val option = new MarkerOptions().
-                       draggable(false).
-                       position(new LatLng(plc.latitude,
-                                            plc.longitude)).
-                       snippet(plc.name)
-          markers.add(PlaceMarker(plc, getMap.addMarker(option)))
-        }
-      }
-
-      if (!isCurrentStillInView) {
-        currentHighlighted = null
-        dore.eventbus ! MapUnderbarFrag.Clear
+      allMarkers = for (plc <- plcs) yield {
+        val option = new MarkerOptions().
+                     draggable(false).
+                     position(new LatLng(plc.latitude,
+                                          plc.longitude)).
+                     snippet(plc.name)
+        PlaceMarker(plc, getMap.addMarker(option))
       }
     }
 
@@ -253,7 +196,7 @@ object PlacesMapFragment {
     }
 
     private def findMatchingPlaceFor(marker: Marker): Option[PlaceMarker] = {
-      markers.find { pm =>
+      allMarkers.find { pm =>
         (pm.place.name == marker.getSnippet) || (pm.marker eq marker)
       }
     }
