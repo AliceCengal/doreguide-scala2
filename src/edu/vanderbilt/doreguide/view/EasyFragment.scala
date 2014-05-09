@@ -29,7 +29,7 @@ trait EasyFragment {
 trait EasyChainCall {
 
   class ChainCall[T](obj: T) {
-    def seq(calls: (T => Unit)*) {
+    def <<<(calls: (T => Unit)*) {
       for (c <- calls) { c(obj) }
     }
   }

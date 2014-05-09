@@ -117,7 +117,7 @@ object PlacesMapFragment {
 
       // I have absolutely no justification why this should be done this
       // way. It's just fun...
-      getMap seq (
+      getMap <<< (
           _.getUiSettings.setZoomControlsEnabled(false),
           _.setMyLocationEnabled(true),
           _.moveCamera(defaultCameraUpdate),
