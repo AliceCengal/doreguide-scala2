@@ -1,7 +1,5 @@
 package edu.vanderbilt.doreguide
 
-import scala.collection.mutable
-
 import android.app.Fragment
 import android.os.{Message, Handler}
 import android.widget.TextView
@@ -61,6 +59,13 @@ object PlacesMapFragment {
 
   def showAll = new PlacesMapFragment with ShowAll
 
+  private def findMatching(marker: Marker,
+                           pms: Seq[PlaceMarker]): Option[PlaceMarker] = {
+    pms.find {
+      _.place.name == marker.getSnippet
+    }
+  }
+
   trait MapBehaviour {
     def init()
     def handleSpecial(msg: AnyRef) {}
@@ -93,16 +98,10 @@ object PlacesMapFragment {
     }
 
     override def onMarkerClick(marker: Marker): Boolean = {
-      for (PlaceMarker(place, _) <- markers.find(pm => pm.place.name.equals(marker.getSnippet))) {
+      for (PlaceMarker(place, _) <- findMatching(marker, allMarkers)) {
         dore.eventbus ! MarkerClicked(place)
       }
-
-      getMap.animateCamera(CameraUpdateFactory.
-                              newLatLng(marker.getPosition))
-
-      markers.foreach(pm => pm.marker.setIcon(normalIcon))
-      marker.setIcon(highlighted)
-      true
+      false
     }
 
   }
@@ -168,7 +167,7 @@ object PlacesMapFragment {
     }
 
     private def handleMatchingMarker(marker: Marker) {
-      for (PlaceMarker(p, m) <- findMatchingPlaceFor(marker)) {
+      for (PlaceMarker(p, m) <- findMatching(marker, allMarkers)) {
         dore.eventbus ! MarkerClicked(p)
       }
     }
@@ -197,12 +196,6 @@ object PlacesMapFragment {
       } catch {
         case bogus: IllegalArgumentException => /* Do nothing */
         case e: Throwable => throw e
-      }
-    }
-
-    private def findMatchingPlaceFor(marker: Marker): Option[PlaceMarker] = {
-      allMarkers.find { pm =>
-        (pm.place.name == marker.getSnippet) || (pm.marker eq marker)
       }
     }
 

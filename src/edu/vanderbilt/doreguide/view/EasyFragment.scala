@@ -35,6 +35,6 @@ trait EasyChainCall {
     }
   }
 
-  implicit def ChainAnyref[U](a: U): ChainCall[U] = new ChainCall[U](a)
+  implicit def anyrefToChainCall[U](a: U): ChainCall[U] = new ChainCall[U](a)
 
 }
