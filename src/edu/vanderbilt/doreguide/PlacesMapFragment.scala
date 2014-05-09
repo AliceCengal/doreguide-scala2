@@ -71,7 +71,7 @@ object PlacesMapFragment {
 
     override def init() {
       val googleMap = getMap
-
+      googleMap.getUiSettings.setZoomControlsEnabled(false)
       googleMap.moveCamera(defaultCameraUpdate)
       for (plc <- dore.getAllHearted) {
         val option = new MarkerOptions().
@@ -109,11 +109,12 @@ object PlacesMapFragment {
     self: PlacesMapFragment =>
 
     private val MARKER_COUNt = 20
-    private val CLOSE_ZOOM = 18
+    private val CLOSE_ZOOM   = 18
     private var currentHighlighted: PlaceMarker = null
 
     override def init() {
       val googleMap = getMap
+      googleMap.getUiSettings.setZoomControlsEnabled(false)
       googleMap.setMyLocationEnabled(true)
       googleMap.moveCamera(defaultCameraUpdate)
       googleMap.setOnMarkerClickListener(this)
@@ -181,31 +182,80 @@ object PlacesMapFragment {
 
     override def onMarkerClick(marker: Marker): Boolean = {
       marker.setIcon(highlighted)
-      for (pm <- findMatchingPlaceFor(marker)) {
-        dore.eventbus ! MarkerClicked(pm.place)
 
-        if (currentHighlighted != null) {
-          currentHighlighted.marker.setIcon(normalIcon)
-        }
-        currentHighlighted = pm
+      if ((currentHighlighted != null ) &&
+          (currentHighlighted.marker ne marker)) {
+        currentHighlighted.marker.setIcon(normalIcon)
       }
+      handleMatchingMarker(marker)
       true
     }
 
+    private def handleMatchingMarker(marker: Marker) {
+      findMatchingPlaceFor(marker) match {
+        case Some(pm) =>
+          dore.eventbus ! MarkerClicked(pm.place)
+          currentHighlighted = pm
+        case None =>
+          safeClear()
+          drawMarkerForPlaces(markers.map(_.place).toList)
+      }
+    }
+
+    private def drawMarkerForPlaces(plcs: Seq[Place]) {
+      markers.empty
+      var isCurrentStillInView = false
+
+      for (plc <- plcs) {
+        if (currentHighlighted != null &&
+            plc.uniqueId == currentHighlighted.place.uniqueId) {
+          val option = new MarkerOptions().
+                       icon(highlighted).
+                       draggable(false).
+                       position(new LatLng(plc.latitude,
+                                            plc.longitude)).
+                       snippet(plc.name)
+          val pm = PlaceMarker(plc, getMap.addMarker(option))
+          currentHighlighted = pm
+          markers.add(currentHighlighted)
+          isCurrentStillInView = true
+
+        } else {
+          val option = new MarkerOptions().
+                       draggable(false).
+                       position(new LatLng(plc.latitude,
+                                            plc.longitude)).
+                       snippet(plc.name)
+          markers.add(PlaceMarker(plc, getMap.addMarker(option)))
+        }
+      }
+
+      if (!isCurrentStillInView) {
+        currentHighlighted = null
+        dore.eventbus ! MapUnderbarFrag.Clear
+      }
+    }
+
     override def onCameraChange(position: CameraPosition) {
+      safeClear()
+      dore.placeServer request PlaceServer.FindNClosest(position.target.latitude,
+                                                         position.target.longitude,
+                                                         MARKER_COUNt)
+    }
+
+    private def safeClear() {
       try {
         getMap.clear()
       } catch {
         case bogus: IllegalArgumentException => /* Do nothing */
         case e: Throwable => throw e
       }
-      dore.placeServer request PlaceServer.FindNClosest(position.target.latitude,
-                                                         position.target.longitude,
-                                                         MARKER_COUNt)
     }
 
     private def findMatchingPlaceFor(marker: Marker): Option[PlaceMarker] = {
-      markers.find(_.place.name == marker.getSnippet)
+      markers.find { pm =>
+        (pm.place.name == marker.getSnippet) || (pm.marker eq marker)
+      }
     }
 
   }

@@ -3,8 +3,9 @@
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:textSize="24sp"
-          android:padding="16dp"
+          android:padding="8dp"
           android:gravity="center_vertical"
+          android:alpha="0.9"
           android:background="@drawable/white_to_darkgold"
           android:text="@string/campus"
           android:id="@+id/tv_title"/>
