@@ -3,13 +3,14 @@ package edu.vanderbilt.doreguide.service
 import java.text.DecimalFormat
 import android.location.{Criteria, LocationManager, Location}
 import android.content.Context
+import edu.vanderbilt.doreguide.view.EasyChainCall
 
 /**
  * Does all location related stuff
  *
  * Created by athran on 4/15/14.
  */
-object Geomancer {
+object Geomancer extends EasyChainCall {
   val DEFAULT_LONGITUDE = -86.803889
   val DEFAULT_LATITUDE  = 36.147381
   val DEFAULT_LOC       = initDefaultLocation
@@ -50,21 +51,22 @@ object Geomancer {
     2 * atan2(sqrt(a), sqrt(1 - a)) * EARTH_RADIUS
   }
 
+  /**
+   * One of the most beautiful thing in the world.
+   */
   def defaultCriteria = {
-    val crit = new Criteria()
-    crit setAccuracy         Criteria.ACCURACY_FINE
-    crit setAltitudeRequired false
-    crit setBearingRequired  false
-    crit setSpeedRequired    false
-    crit setCostAllowed      true
-    crit
+    new Criteria <<< (
+        _ setBearingRequired  false,
+        _ setSpeedRequired    false,
+        _ setCostAllowed      true,
+        _ setAltitudeRequired false,
+        _ setAccuracy         Criteria.ACCURACY_FINE)
   }
 
   def initDefaultLocation = {
-    val l = new Location("default")
-    l.setLatitude(DEFAULT_LATITUDE)
-    l.setLongitude(DEFAULT_LONGITUDE)
-    l
+    new Location("default") <<< (
+        _ setLatitude DEFAULT_LATITUDE,
+        _ setLongitude DEFAULT_LONGITUDE)
   }
 
   /**

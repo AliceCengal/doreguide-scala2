@@ -31,7 +31,7 @@ class PlacesMapFragment extends MapFragment
 {
   self: MapBehaviour =>
 
-  val markers = mutable.Set.empty[PlaceMarker]
+  //val markers = mutable.Set.empty[PlaceMarker]
 
   def handleMessage(msg: Message): Boolean = {
     handleSpecial(msg.obj)
@@ -66,25 +66,30 @@ object PlacesMapFragment {
     def handleSpecial(msg: AnyRef) {}
   }
 
-  trait ShowHearted extends MapBehaviour with GoogleMap.OnMarkerClickListener {
+  trait ShowHearted extends MapBehaviour
+                            with GoogleMap.OnMarkerClickListener
+                            with EasyChainCall
+  {
     self: PlacesMapFragment =>
 
+    private var allMarkers: Seq[PlaceMarker] = List.empty
+
     override def init() {
-      val googleMap = getMap
-      googleMap.getUiSettings.setZoomControlsEnabled(false)
-      googleMap.moveCamera(defaultCameraUpdate)
-      for (plc <- dore.getAllHearted) {
+      val googleMap = getMap <<< (
+          _.getUiSettings.setZoomControlsEnabled(false),
+          _.moveCamera(defaultCameraUpdate),
+          _.setOnMarkerClickListener(this))
+
+
+      allMarkers = for (plc <- dore.getAllHearted) yield {
         val option = new MarkerOptions().
                     draggable(false).
                     position(new LatLng(plc.latitude,
                                          plc.longitude)).
-                    title(plc.name)
-        val marker = googleMap.addMarker(option)
-        marker.setSnippet(plc.name)
-        markers.add(PlaceMarker(plc, marker)) // terrible API
+                    snippet(plc.name)
+        PlaceMarker(plc, googleMap.addMarker(option)) // terrible API
       }
 
-      googleMap.setOnMarkerClickListener(this)
     }
 
     override def onMarkerClick(marker: Marker): Boolean = {
