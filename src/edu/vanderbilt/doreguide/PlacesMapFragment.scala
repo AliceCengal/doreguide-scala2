@@ -109,6 +109,8 @@ object PlacesMapFragment {
     self: PlacesMapFragment =>
 
     private val MARKER_COUNt = 20
+    private val CLOSE_ZOOM = 18
+    private var currentHighlighted: PlaceMarker = null
 
     override def init() {
       val googleMap = getMap
@@ -129,7 +131,7 @@ object PlacesMapFragment {
                                             MARKER_COUNt)
               getMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(loc.getLatitude,
                                                                               loc.getLongitude),
-                                                                   18))
+                                                                   CLOSE_ZOOM))
             case None =>
               dore.placeServer request
                   PlaceServer.FindNClosest(Geomancer.DEFAULT_LATITUDE,
@@ -175,7 +177,7 @@ object PlacesMapFragment {
       }
     }
 
-    private var currentHighlighted: PlaceMarker = null
+
 
     override def onMarkerClick(marker: Marker): Boolean = {
       marker.setIcon(highlighted)
@@ -240,7 +242,7 @@ class MapUnderbarFrag extends Fragment
       case Display(plc) =>
         display(plc)
       case Clear =>
-        box.setText("Vanderbilt University")
+        box.setText(dore.getString(R.string.campus))
       case _ =>
     }
     true
