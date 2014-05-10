@@ -28,13 +28,13 @@ trait EasyFragment {
 
 trait EasyChainCall {
 
-  class ChainCall[T](obj: T) {
-    def <<<(calls: (T => Unit)*): T = {
-      for (c <- calls) { c(obj) }
-      obj
-    }
-  }
-
   implicit def anyrefToChainCall[U](a: U): ChainCall[U] = new ChainCall[U](a)
 
+}
+
+class ChainCall[T](obj: T) {
+  def <<<(calls: (T => Unit)*): T = {
+    for (c <- calls) { c(obj) }
+    obj
+  }
 }

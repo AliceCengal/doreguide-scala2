@@ -69,57 +69,6 @@ class MainActivity extends Activity
     true
   }
 
-  def handleMessageOld(msg: Message): Boolean = {
-    msg.obj match {
-      case HeartFrag.MapButtonClicked =>
-        getFragmentManager.
-            beginTransaction().
-            addToBackStack(null).
-            replace(R.id.main_main,
-                    PlacesMapFragment.showHearted).
-            replace(R.id.main_underbar,
-                    new MapUnderbarFrag).
-            commit()
-
-      case PlaceDetailFrag.MapButtonClicked(plc) =>
-        getFragmentManager.
-            beginTransaction().
-            addToBackStack(null).
-            replace(R.id.main_main,
-                    PlacesMapFragment.showAll).
-            replace(R.id.main_underbar,
-                    new MapUnderbarFrag).
-            commit()
-
-      case PlaceDetailFrag.NearbyPlaceSelected(plc) =>
-        getFragmentManager.
-            beginTransaction().
-            replace(R.id.main_main,
-                    PlaceDetailFrag.showThisPlace(plc)).
-            commit()
-
-      case HeartFrag.ListItemClicked(plc) =>
-        getFragmentManager.
-            beginTransaction().
-            addToBackStack(null).
-            replace(R.id.main_main,
-                    PlaceDetailFrag.showThisPlace(plc)).
-            commit()
-
-      case MapUnderbarFrag.MapUnderbarClicked(plc) =>
-        getFragmentManager.
-            beginTransaction().
-            addToBackStack(null).
-            replace(R.id.main_main,
-                    PlaceDetailFrag.showThisPlace(plc)).
-            remove(getFragmentManager.findFragmentById(R.id.main_underbar)).
-            commit()
-
-      case _ =>
-    }
-    true
-  }
-
   def clearFragments() {
     getFragmentManager.
         beginTransaction().

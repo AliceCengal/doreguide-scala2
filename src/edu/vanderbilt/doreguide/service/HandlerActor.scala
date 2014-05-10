@@ -9,16 +9,35 @@ import edu.vanderbilt.doreguide.service.Dore.Initialize
  *
  * Created by athran on 4/15/14.
  */
-trait HandlerActor extends Handler {
+trait HandlerActor extends Handler with Actor {
 
-  def !(msg: AnyRef): Unit = {
+  override def !(msg: AnyRef): Unit = {
     Message.obtain(this, 0, msg).sendToTarget()
   }
 
-  def request(msg: AnyRef)(implicit requester: HandlerActor): Unit = {
+  override def request(msg: AnyRef)(implicit requester: HandlerActor): Unit = {
     this ! (requester, msg)
   }
 
+}
+
+trait ActorConversion {
+  implicit def handlerToActor(h: Handler): Actor = new ActorShell(h)
+}
+
+class ActorShell(handler: Handler) extends Actor {
+  override def !(msg: AnyRef): Unit = {
+    Message.obtain(handler, 0, msg).sendToTarget()
+  }
+
+  override def request(msg: AnyRef)(implicit requester: HandlerActor): Unit = {
+    this ! (requester, msg)
+  }
+}
+
+trait Actor {
+  def !(msg: AnyRef): Unit
+  def request(msg: AnyRef)(implicit requester: HandlerActor): Unit
 }
 
 object HandlerActor {
