@@ -1,4 +1,4 @@
-package com.marsupial.wombat.service
+package edu.vanderbilt.doreguide.service
 
 import android.app.Fragment
 import android.view.{View, ViewGroup, LayoutInflater}

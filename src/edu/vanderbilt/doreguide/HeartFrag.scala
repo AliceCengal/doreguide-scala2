@@ -7,10 +7,10 @@ import android.view.View
 
 import edu.vanderbilt.doreguide.view.ArrayAdapterBuilder.ToString
 import edu.vanderbilt.doreguide.model.Place
-import com.marsupial.wombat.service.Helpers.EasyFragment
 import edu.vanderbilt.doreguide.service.AppService.FragmentInjection
 import edu.vanderbilt.doreguide.view.ArrayAdapterBuilder
 import edu.vanderbilt.doreguide.service.ChattyFragment
+import edu.vanderbilt.doreguide.service.Helpers.EasyFragment
 
 /**
  * A page showing all hearted Places

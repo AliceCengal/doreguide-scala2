@@ -4,14 +4,15 @@ import android.view.{View, LayoutInflater}
 import android.os.{Message, Handler}
 import android.app.Fragment
 import android.location.Location
-import android.widget.{CheckBox, Toast, ImageButton, ScrollView, LinearLayout, EditText, Button, ImageView, TextView}
+import android.widget.{CheckBox, Toast, ImageButton,
+        ScrollView, LinearLayout, EditText, Button, ImageView, TextView}
 import android.graphics.Bitmap
 import android.view.View.OnClickListener
 
 import edu.vanderbilt.doreguide.model.Place
 import edu.vanderbilt.doreguide.service.{ChattyFragment, PlaceServer, Geomancer}
 import edu.vanderbilt.doreguide.service.AppService.FragmentInjection
-import com.marsupial.wombat.service.Helpers.EasyFragment
+import edu.vanderbilt.doreguide.service.Helpers.EasyFragment
 
 /**
  * The page that displays the details of a Place

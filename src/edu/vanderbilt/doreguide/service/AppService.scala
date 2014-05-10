@@ -2,12 +2,12 @@ package edu.vanderbilt.doreguide.service
 
 import scala.collection.mutable
 
+import android.app.{Activity, Fragment}
 import android.content.Context
 import android.os.{Message, Handler, HandlerThread}
 
 import edu.vanderbilt.doreguide.model.Place
 import edu.vanderbilt.doreguide.service.AppService._
-import android.app.{Activity, Fragment}
 
 /**
  * The starting point of the app process. Initiates the services.

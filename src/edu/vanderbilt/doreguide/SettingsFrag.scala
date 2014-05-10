@@ -2,8 +2,8 @@ package edu.vanderbilt.doreguide
 
 import android.app.Fragment
 import android.os.{Message, Handler}
-import com.marsupial.wombat.service.Helpers.EasyFragment
 import edu.vanderbilt.doreguide.service.AppService.FragmentInjection
+import edu.vanderbilt.doreguide.service.Helpers.EasyFragment
 
 /**
  * Created by athran on 4/23/14.

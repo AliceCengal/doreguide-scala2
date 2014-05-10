@@ -16,7 +16,7 @@ import edu.vanderbilt.doreguide.model.Place
 import edu.vanderbilt.doreguide.PlacesMapFragment._
 import edu.vanderbilt.doreguide.service.{ChattyFragment, PlaceServer, Geomancer}
 import edu.vanderbilt.doreguide.service.AppService.FragmentInjection
-import com.marsupial.wombat.service.Helpers.{EasyFragment, EasyChainCall}
+import edu.vanderbilt.doreguide.service.Helpers.{EasyFragment, EasyChainCall}
 
 /**
  * The map with its underbar
