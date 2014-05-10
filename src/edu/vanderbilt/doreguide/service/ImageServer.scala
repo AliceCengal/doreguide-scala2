@@ -39,7 +39,7 @@ object ImageServer {
   val rawUrl = "https://raw2.github.com/AliceCengal/vanderbilt-data/master/images.json"
 }
 
-private[service] class ImageServer extends HandlerActor.Server {
+private[service] class ImageServer extends Server {
 
   import ImageServer._
   import scala.collection.JavaConverters._

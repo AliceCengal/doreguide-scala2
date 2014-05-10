@@ -6,24 +6,25 @@ import android.content.Context
 import android.os.{Message, Handler, HandlerThread}
 
 import edu.vanderbilt.doreguide.model.Place
-import edu.vanderbilt.doreguide.service.Dore.HeartPersistence
+import edu.vanderbilt.doreguide.service.AppService._
+import android.app.{Activity, Fragment}
 
 /**
  * The starting point of the app process. Initiates the services.
  *
  * Created by athran on 4/15/14.
  */
-class Dore extends android.app.Application with HeartPersistence {
-
-  import Dore.Initialize
-
+class AppService extends android.app.Application
+                         with HeartPersistence
+                         with ActorConversion
+{
   private val IMAGE_SERVER_INDEX = 0
   private val PLACE_SERVER_INDEX = 1
   private val GEOMANCER_INDEX    = 2
   private val FEEDBACK_INDEX     = 3
 
-  private var handles        = List.empty[HandlerActor]
-  private val eventbusHandle = HandlerActor.sync(new EventBus)
+  private var handles        = List.empty[Handler]
+  private val eventbusHandle = new Handler(new EventHub)
   private val heartedSet     = mutable.Set.empty[Place]
 
   override def onCreate() {
@@ -31,15 +32,17 @@ class Dore extends android.app.Application with HeartPersistence {
     initializeGlobalState()
   }
 
-  def imageServer: HandlerActor = handles(IMAGE_SERVER_INDEX)
+  def imageServer: Handler = handles(IMAGE_SERVER_INDEX)
 
-  def placeServer: HandlerActor = handles(PLACE_SERVER_INDEX)
+  def placeServer: Handler = handles(PLACE_SERVER_INDEX)
 
-  def geomancer: HandlerActor   = handles(GEOMANCER_INDEX)
+  def geomancer: Handler   = handles(GEOMANCER_INDEX)
 
-  def feedback: HandlerActor    = handles(FEEDBACK_INDEX)
+  def feedback: Handler    = handles(FEEDBACK_INDEX)
 
-  def eventbus: HandlerActor    = eventbusHandle
+  def eventbus: Handler    = eventbusHandle
+
+  def eventHub: Handler    = eventbusHandle
 
   def heart(plc: Place): Unit = {
     heartedSet.add(plc)
@@ -73,9 +76,7 @@ class Dore extends android.app.Application with HeartPersistence {
           new FeedbackServer).
             map(
               callback =>
-                HandlerActor.async(
-                  thread.getLooper,
-                  callback))
+                new Handler(thread.getLooper, callback))
 
     handles foreach { _ ! Initialize(this) }
 
@@ -84,7 +85,7 @@ class Dore extends android.app.Application with HeartPersistence {
       handles(this.PLACE_SERVER_INDEX).
       request(
             PlaceServer.GetPlacesIdRange(heartedIds))(
-            HandlerActor.sync(new PlaceReceiver))
+            new Handler(new PlaceReceiver))
     }
   }
 
@@ -101,7 +102,7 @@ class Dore extends android.app.Application with HeartPersistence {
 
 }
 
-private[service] object Dore {
+object AppService {
 
   val PREFS = "doreguide"
 
@@ -131,6 +132,26 @@ private[service] object Dore {
           map(numString => Integer.parseInt(numString)).
           toList
     }
+
+  }
+
+  /**
+   * Allow easy access to the Application object in Activity
+   */
+  trait ActivityInjection {
+    self: Activity =>
+
+    def app = self.getApplication.asInstanceOf[AppService]
+
+  }
+
+  /**
+   * Allow easy access to the Application object in Fragment
+   */
+  trait FragmentInjection {
+    self: Fragment =>
+
+    def app = self.getActivity.getApplication.asInstanceOf[AppService]
 
   }
 

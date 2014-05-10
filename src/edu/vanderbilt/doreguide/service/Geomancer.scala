@@ -3,7 +3,7 @@ package edu.vanderbilt.doreguide.service
 import java.text.DecimalFormat
 import android.location.{Criteria, LocationManager, Location}
 import android.content.Context
-import edu.vanderbilt.doreguide.view.EasyChainCall
+import com.marsupial.wombat.service.Helpers.EasyChainCall
 
 /**
  * Does all location related stuff
@@ -106,7 +106,7 @@ object Geomancer extends EasyChainCall {
 
 }
 
-private[service] class Geomancer extends HandlerActor.Server {
+private[service] class Geomancer extends Server {
 
   import Geomancer._
 

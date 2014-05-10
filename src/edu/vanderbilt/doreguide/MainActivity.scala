@@ -4,16 +4,16 @@ import android.os.{Message, Handler, Bundle}
 import android.app.{FragmentTransaction, Fragment, Activity}
 import android.view.{MenuItem, Menu}
 
-import edu.vanderbilt.doreguide.service.{HandlerActor, EventBus}
-import edu.vanderbilt.doreguide.view.SimpleInjections
+import edu.vanderbilt.doreguide.service.{ActorConversion, EventHub, AppService}
 import edu.vanderbilt.doreguide.MainActivity._
 import edu.vanderbilt.doreguide.model.Place
 
 class MainActivity extends Activity
-                           with SimpleInjections.ActivityInjection
+                           with AppService.ActivityInjection
                            with Handler.Callback
+                           with ActorConversion
 {
-  lazy val communicator = HandlerActor.sync(this)
+  lazy val communicator = new Handler(this)
   implicit val implicitMain = this
   var mainState: MainState = null
 
@@ -25,14 +25,14 @@ class MainActivity extends Activity
 
   override def onStart() {
     super.onStart()
-    dore.eventbus ! EventBus.Subscribe(communicator)
+    app.eventbus ! EventHub.Subscribe(communicator)
     ViewingCurrentLocation.enter
   }
 
   override def onStop() {
     super.onStop()
     mainState.leave
-    dore.eventbus ! EventBus.Unsubscribe(communicator)
+    app.eventbus ! EventHub.Unsubscribe(communicator)
   }
 
   override def onCreateOptionsMenu(menu: Menu): Boolean = {

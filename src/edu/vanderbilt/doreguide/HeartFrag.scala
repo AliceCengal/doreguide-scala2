@@ -5,9 +5,12 @@ import android.os.{Message, Handler}
 import android.widget.{ImageButton, AdapterView, ListView}
 import android.view.View
 
-import edu.vanderbilt.doreguide.view.{ChattyFrag, SimpleInjections, EasyFragment, ArrayAdapterBuilder}
-import ArrayAdapterBuilder.ToString
+import edu.vanderbilt.doreguide.view.ArrayAdapterBuilder.ToString
 import edu.vanderbilt.doreguide.model.Place
+import com.marsupial.wombat.service.Helpers.EasyFragment
+import edu.vanderbilt.doreguide.service.AppService.FragmentInjection
+import edu.vanderbilt.doreguide.view.ArrayAdapterBuilder
+import edu.vanderbilt.doreguide.service.ChattyFragment
 
 /**
  * A page showing all hearted Places
@@ -15,8 +18,8 @@ import edu.vanderbilt.doreguide.model.Place
  * Created by athran on 4/19/14.
  */
 class HeartFrag extends Fragment
-                        with ChattyFrag
-                        with SimpleInjections.FragmentInjection
+                        with ChattyFragment
+                        with FragmentInjection
                         with EasyFragment
                         with Handler.Callback
                         with AdapterView.OnItemClickListener
@@ -37,7 +40,7 @@ class HeartFrag extends Fragment
     import scala.collection.JavaConversions.seqAsJavaList
 
     list.setAdapter(ArrayAdapterBuilder.
-                    fromCollection(dore.getAllHearted).
+                    fromCollection(app.getAllHearted).
                     withContext(getActivity).
                     withResource(R.layout.simple_text).
                     withStringer(new ToString[Place] {
@@ -53,11 +56,11 @@ class HeartFrag extends Fragment
                   p2: View,
                   position: Int,
                   p4: Long): Unit = {
-    dore.eventbus ! HeartFrag.ListItemClicked(dore.getAllHearted(position))
+    app.eventbus ! HeartFrag.ListItemClicked(app.getAllHearted(position))
   }
 
   def onClick(p1: View): Unit = {
-    dore.eventbus ! HeartFrag.MapButtonClicked
+    app.eventbus ! HeartFrag.MapButtonClicked
   }
 }
 

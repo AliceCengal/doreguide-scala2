@@ -11,7 +11,7 @@ object FeedbackServer {
 
 }
 
-private[service] class FeedbackServer extends HandlerActor.Server {
+private[service] class FeedbackServer extends Server {
   def init(ctx: Context): Unit = {}
 
   def handleRequest(req: AnyRef): Unit = {}

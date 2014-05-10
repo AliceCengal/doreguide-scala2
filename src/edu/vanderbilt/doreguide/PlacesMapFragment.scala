@@ -13,9 +13,10 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.{CameraUpdateFactory, MapFragment}
 
 import edu.vanderbilt.doreguide.model.Place
-import edu.vanderbilt.doreguide.view.{EasyChainCall, ChattyFrag, SimpleInjections, EasyFragment}
 import edu.vanderbilt.doreguide.PlacesMapFragment._
-import edu.vanderbilt.doreguide.service.{PlaceServer, Geomancer}
+import edu.vanderbilt.doreguide.service.{ChattyFragment, PlaceServer, Geomancer}
+import edu.vanderbilt.doreguide.service.AppService.FragmentInjection
+import com.marsupial.wombat.service.Helpers.{EasyFragment, EasyChainCall}
 
 /**
  * The map with its underbar
@@ -23,13 +24,11 @@ import edu.vanderbilt.doreguide.service.{PlaceServer, Geomancer}
  * Created by athran on 4/20/14.
  */
 class PlacesMapFragment extends MapFragment
-                                with ChattyFrag
-                                with SimpleInjections.FragmentInjection
+                                with ChattyFragment
+                                with FragmentInjection
                                 with Handler.Callback
 {
   self: MapBehaviour =>
-
-  //val markers = mutable.Set.empty[PlaceMarker]
 
   def handleMessage(msg: Message): Boolean = {
     handleSpecial(msg.obj)
@@ -86,7 +85,7 @@ object PlacesMapFragment {
           _.setOnMarkerClickListener(this))
 
 
-      allMarkers = for (plc <- dore.getAllHearted) yield {
+      allMarkers = for (plc <- app.getAllHearted) yield {
         val option = new MarkerOptions().
                     draggable(false).
                     position(new LatLng(plc.latitude,
@@ -99,7 +98,7 @@ object PlacesMapFragment {
 
     override def onMarkerClick(marker: Marker): Boolean = {
       for (PlaceMarker(place, _) <- findMatching(marker, allMarkers)) {
-        dore.eventbus ! MarkerClicked(place)
+        app.eventbus ! MarkerClicked(place)
       }
       false
     }
@@ -127,7 +126,7 @@ object PlacesMapFragment {
           _.moveCamera(defaultCameraUpdate),
           _.setOnMarkerClickListener(this))
 
-      dore.geomancer request Geomancer.GetLocation
+      app.geomancer request Geomancer.GetLocation
     }
 
     override def handleSpecial(msg: AnyRef) {
@@ -135,7 +134,7 @@ object PlacesMapFragment {
         case Geomancer.LocationResult(maybeLoc) =>
           maybeLoc match {
             case Some(loc) =>
-              dore.placeServer request
+              app.placeServer request
                   PlaceServer.FindNClosest(loc.getLatitude,
                                             loc.getLongitude,
                                             MARKER_COUNt)
@@ -145,7 +144,7 @@ object PlacesMapFragment {
                                   loc.getLongitude),
                       CLOSE_ZOOM))
             case None =>
-              dore.placeServer request
+              app.placeServer request
                   PlaceServer.FindNClosest(Geomancer.DEFAULT_LATITUDE,
                                             Geomancer.DEFAULT_LONGITUDE,
                                             MARKER_COUNt)
@@ -168,7 +167,7 @@ object PlacesMapFragment {
 
     private def handleMatchingMarker(marker: Marker) {
       for (PlaceMarker(p, m) <- findMatching(marker, allMarkers)) {
-        dore.eventbus ! MarkerClicked(p)
+        app.eventbus ! MarkerClicked(p)
       }
     }
 
@@ -185,7 +184,7 @@ object PlacesMapFragment {
 
     override def onCameraChange(position: CameraPosition) {
       safeClear()
-      dore.placeServer request PlaceServer.FindNClosest(position.target.latitude,
+      app.placeServer request PlaceServer.FindNClosest(position.target.latitude,
                                                          position.target.longitude,
                                                          MARKER_COUNt)
     }
@@ -204,8 +203,8 @@ object PlacesMapFragment {
 }
 
 class MapUnderbarFrag extends Fragment
-                              with ChattyFrag
-                              with SimpleInjections.FragmentInjection
+                              with ChattyFragment
+                              with FragmentInjection
                               with EasyFragment
                               with Handler.Callback
 {
@@ -222,7 +221,7 @@ class MapUnderbarFrag extends Fragment
     box.setOnClickListener(new OnClickListener {
       def onClick(p1: View): Unit = {
         for (maybePlace <- place) {
-          dore.eventbus ! MapUnderbarFrag.MapUnderbarClicked(maybePlace)
+          app.eventbus ! MapUnderbarFrag.MapUnderbarClicked(maybePlace)
         }
       }
     })
@@ -236,7 +235,7 @@ class MapUnderbarFrag extends Fragment
         display(plc)
       case Clear =>
         place = None
-        box.setText(dore.getString(R.string.campus))
+        box.setText(app.getString(R.string.campus))
       case _ =>
     }
     true

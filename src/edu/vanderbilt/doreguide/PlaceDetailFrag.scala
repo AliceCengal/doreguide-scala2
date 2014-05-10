@@ -9,8 +9,9 @@ import android.graphics.Bitmap
 import android.view.View.OnClickListener
 
 import edu.vanderbilt.doreguide.model.Place
-import edu.vanderbilt.doreguide.view.{ChattyFrag, SimpleInjections, EasyFragment}
-import edu.vanderbilt.doreguide.service.{PlaceServer, Geomancer}
+import edu.vanderbilt.doreguide.service.{ChattyFragment, PlaceServer, Geomancer}
+import edu.vanderbilt.doreguide.service.AppService.FragmentInjection
+import com.marsupial.wombat.service.Helpers.EasyFragment
 
 /**
  * The page that displays the details of a Place
@@ -18,8 +19,8 @@ import edu.vanderbilt.doreguide.service.{PlaceServer, Geomancer}
  * Created by athran on 4/17/14.
  */
 class PlaceDetailFrag extends Fragment
-                              with ChattyFrag
-                              with SimpleInjections.FragmentInjection
+                              with ChattyFragment
+                              with FragmentInjection
                               with Handler.Callback
                               with EasyFragment
                               with View.OnClickListener
@@ -71,7 +72,7 @@ class PlaceDetailFrag extends Fragment
     import PlaceServer.FindNClosest
 
     for (loc <- maybeLoc) {
-      dore.placeServer request FindNClosest(loc.getLatitude,
+      app.placeServer request FindNClosest(loc.getLatitude,
                                             loc.getLongitude,
                                             NEARBY_COUNT + 1)
     }
@@ -80,7 +81,7 @@ class PlaceDetailFrag extends Fragment
   private def handlePlaces(plcs: List[Place]) {
     if (plcs.size == 1) {
       val plc = plcs(0)
-      dore.placeServer request
+      app.placeServer request
           PlaceServer.FindNClosest(plc.latitude,
                                    plc.longitude,
                                    NEARBY_COUNT + 1)
@@ -97,14 +98,14 @@ class PlaceDetailFrag extends Fragment
     tvTitle.setText(plc.name)
     tvDescription.setText(plc.description)
 
-    if (dore.isHearted(plc)) {
+    if (app.isHearted(plc)) {
       cbHeart.setChecked(true)
     } else {
       cbHeart.setChecked(false)
     }
 
     if (!plc.images.isEmpty) {
-      dore.imageServer request ImageServer.DispatchImageFromId(plc.images(0))
+      app.imageServer request ImageServer.DispatchImageFromId(plc.images(0))
     }
   }
 
@@ -136,10 +137,10 @@ class PlaceDetailFrag extends Fragment
       doHeartToggle()
 
     } else if (v == btnMap) {
-      dore.eventbus ! MapButtonClicked(place)
+      app.eventbus ! MapButtonClicked(place)
 
     } else if (v == ivMainImage) {
-      dore.eventbus ! MainImageClicked(place)
+      app.eventbus ! MainImageClicked(place)
     }
   }
 
@@ -152,17 +153,17 @@ class PlaceDetailFrag extends Fragment
     } else if (body == null || body.isEmpty) {
       showToast("Please include your feedback")
     } else {
-      dore.feedback ! FeedbackServer.Comment(email, body)
+      app.feedback ! FeedbackServer.Comment(email, body)
     }
   }
 
   private def doHeartToggle() {
-    if (dore.isHearted(place)) {
-      dore.unheart(place)
+    if (app.isHearted(place)) {
+      app.unheart(place)
       cbHeart.setChecked(false)
 
     } else {
-      dore.heart(place)
+      app.heart(place)
       cbHeart.setChecked(true)
     }
   }
@@ -173,7 +174,7 @@ class PlaceDetailFrag extends Fragment
 
   private def createNearbyListDirective(plc: Place) = new OnClickListener {
     def onClick(p1: View): Unit = {
-      dore.eventbus ! NearbyPlaceSelected(plc)
+      app.eventbus ! NearbyPlaceSelected(plc)
     }
   }
 
@@ -207,7 +208,7 @@ object PlaceDetailFrag {
     self: PlaceDetailFrag =>
 
     def init() {
-      dore.geomancer request Geomancer.GetLocation
+      app.geomancer request Geomancer.GetLocation
     }
 
   }
@@ -218,7 +219,7 @@ object PlaceDetailFrag {
     def placeId: Int
 
     def init() {
-      dore.placeServer request PlaceServer.GetPlaceWithId(placeId)
+      app.placeServer request PlaceServer.GetPlaceWithId(placeId)
     }
   }
 

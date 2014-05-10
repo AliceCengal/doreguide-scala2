@@ -60,7 +60,7 @@ object PlaceServer {
 
 }
 
-private[service] class PlaceServer extends HandlerActor.Server {
+private[service] class PlaceServer extends Server {
 
   import PlaceServer._
   import scala.collection.JavaConverters._
