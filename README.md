@@ -3,7 +3,7 @@ Dore Guide
 
 A second rewrite of the [GuideAndroid](https://github.com/VandyMobile/guide-android) in Scala.
 This version uses a different approach to the Reactive Programming technique in building
-and Android app. The [previous version](https://github.com/AliceCengal/doreguide-scala) uses Scala's native Actor library to do events and
+an Android app. The [previous version](https://github.com/AliceCengal/doreguide-scala) uses Scala's native Actor library to do events and
 messaging. I ran into some troubles with that. First, there is the uncertainty that the Dalvik
 VM might not implement the same threading model as the JVM, so we're not completely sure that
 Scala's Actor library will behave correctly.
@@ -27,8 +27,8 @@ and Activity for messaging with minimum boilerplate. The global `EventHub`, init
 in `AppService` and provided through the `XXXInjection` mixins, allows various components of the app
 to communicate with minimal coupling.
 
-These custom contructs will hopefully result in a more responsive and sophisticated applications
-that are still easy to develop.
+These custom contructs will hopefully result in a more responsive and sophisticated application
+that is still easy to develop.
 
 Build
 -----
