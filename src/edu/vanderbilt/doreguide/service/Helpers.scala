@@ -15,7 +15,7 @@ object Helpers {
   /**
    * For when using a third party library, and the library writer unfortunately made
    * the setter methods of their objects to return `void` instead of `this`,
-   * so you can't make a fluent method chaining.
+   * so you can't do fluent method chaining.
    *
    * someLibraryObject <<< (
    *         _.methodOne(),

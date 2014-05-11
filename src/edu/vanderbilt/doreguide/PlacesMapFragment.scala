@@ -158,8 +158,6 @@ object PlacesMapFragment {
       }
     }
 
-
-
     override def onMarkerClick(marker: Marker): Boolean = {
       handleMatchingMarker(marker)
       false

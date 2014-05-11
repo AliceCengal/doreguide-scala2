@@ -109,7 +109,7 @@ abstract class Server extends Handler.Callback {
 
   override def handleMessage(msg: Message): Boolean = {
     msg.obj match {
-      case Initialize(ctx) => init(ctx)
+      case AppService.Initialize(ctx) => init(ctx)
       case (r: HandlerActor, req: AnyRef) =>
         requester = r
         handleRequest(req)
@@ -117,5 +117,3 @@ abstract class Server extends Handler.Callback {
     true
   }
 }
-
-private[service] case class Initialize(ctx: Context)

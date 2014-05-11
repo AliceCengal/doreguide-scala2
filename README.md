@@ -1,18 +1,36 @@
-Vandy Vans
+Dore Guide
 ==========
 
-Vandy Vans is an open-source Android project created by [Vanderbilt University](http://vanderbilt.edu) students through a student organization called [VandyApps](https://www.facebook.com/VandyMobile).
+A second rewrite of the [GuideAndroid](https://github.com/VandyMobile/guide-android) in Scala.
+This version uses a different approach to the Reactive Programming technique in building
+and Android app. The [previous version](https://github.com/AliceCengal/doreguide-scala) uses Scala's native Actor library to do events and
+messaging. I ran into some troubles with that. First, there is the uncertainty that the Dalvik
+VM might not implement the same threading model as the JVM, so we're not completely sure that
+Scala's Actor library will behave correctly.
 
-The purpose of the app is to provide a fast, native way for Vanderbilt students to access the van schedule as well as a live map of the vans' locations on their Android phones.
+Second, Scala's Actor library is deprecated, and
+might be removed in future versions of Scala. We don't want to be stuck with using Scala 2.10.3
+with no future upgrade possible. They recommend using Akka instead, but I couldn't get that to
+work on Android and Maven, and furthermore the Akka workflow necessitates that we have full control over the
+creation of our program's components, which we don't because the Android system does most of
+the initializations and we can only hook into the process through all the "onXXX" methods.
 
-## Credits
+My solution is to use the existing messaging infrastructure on Android, the `Handler` class.
+We can get all the nice DSL and convenience of Scala's Actor, with the performance, compatibility
+and optimization of the native messaging infrastructure by wrapping the `Handler` with `ActorShell`.
+This transformation is made transparent with implicit conversion provided by the `ActorConversion`
+trait.
 
-Vandy Vans for Android was created by [Seth Friedman](https://github.com/sethfri), inspired by the original [Vandy Vans for iOS](github.com/VandyApps/vandyvans-ios).
+Using the `ActorShell(handler)` as a building block, we can build a higher level infrastructure
+that provide more utilities. The traits `ChattyFragment` and `ChattyActivity` configures any Fragment
+and Activity for messaging with minimum boilerplate. The global `EventHub`, initialized
+in `AppService` and provided through the `XXXInjection` mixins, allows various components of the app
+to communicate with minimal coupling.
 
-The graphic design for the project was done by [Fletcher Young](http://vandycommodore.deviantart.com/).
+These custom contructs will hopefully result in a more responsive and sophisticated applications
+that are still easy to develop.
 
-The API used in this project was developed by [Syncromatics](http://www.syncromatics.com/), who also developed the original [Vandy Vans web application](http://vandyvans.com/).
+Build
+-----
 
-## Contact
-
-You can submit any bug reports or feedback either directly through the app or by emailing [vandyvansapp@gmail.com](mailto:vandyvansapp@gmail.com).
+Please refer to my [previous Scala Android apps](https://github.com/AliceCengal/doreguide-scala) for build instructions.
